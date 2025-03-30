@@ -134,25 +134,13 @@ namespace VerbNet.Core
             if (a.Shape[1] != b.Shape[0])
                 throw new ArgumentException($"Cannot multiply matrices with shapes [{a.Shape[0]}, {a.Shape[1]}] and [{b.Shape[0]}, {b.Shape[1]}].");
 
-            int m = a.Shape[0];
-            int n = a.Shape[1];
-            int p = b.Shape[1];
+            int aRows = a.Shape[0];
+            int aCols = a.Shape[1];
+            int bCols = b.Shape[1];
 
-            float[] resultData = new float[m * p];
-            Parallel.For(0, m, i =>
-            {
-                for (int j = 0; j < p; j++)
-                {
-                    float sum = 0f;
-                    for (int k = 0; k < n; k++)
-                    {
-                        sum += a.Data[i * n + k] * b.Data[k * p + j];
-                    }
-                    resultData[i * p + j] = sum;
-                }
-            });
+           
 
-            Tensor result = new Tensor(resultData, [m, p], a.RequiresGrad || b.RequiresGrad);
+            Tensor result = new Tensor(Operator.MatMul(a.Data, b.Data, aRows, aCols, bCols), [aRows, bCols], a.RequiresGrad || b.RequiresGrad);
 
             if (buildGraph)
             {

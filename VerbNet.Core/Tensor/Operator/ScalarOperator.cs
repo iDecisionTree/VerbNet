@@ -62,5 +62,24 @@ namespace VerbNet.Core
 
             return result;
         }
+
+        public static float[] MatMul(float[] a, float[] b, int aRows, int aCols, int bCols)
+        {
+            float[] result = new float[aRows * bCols];
+            Parallel.For(0, aRows, i =>
+            {
+                for (int j = 0; j < bCols; j++)
+                {
+                    float sum = 0f;
+                    for (int k = 0; k < aCols; k++)
+                    {
+                        sum += a[i * aCols + k] * b[k * bCols + j];
+                    }
+                    result[i * bCols + j] = sum;
+                }
+            });
+
+            return result;
+        }
     }
 }

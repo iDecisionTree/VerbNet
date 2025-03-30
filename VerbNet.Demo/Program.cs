@@ -1,4 +1,5 @@
-﻿using VerbNet.Core;
+﻿using System.Diagnostics;
+using VerbNet.Core;
 
 namespace VerbNet.Demo
 {
@@ -16,15 +17,21 @@ namespace VerbNet.Demo
             Tensor input = Tensor.Random([64, 16]);
             Tensor target = Tensor.Random([64, 16]);
 
+            Stopwatch stopwatch = new Stopwatch();
+
             for (int i = 0; i < 1000000; i++)
             {
                 layers.ZeroGrad();
+
+                stopwatch.Restart();
 
                 Tensor output = layers.Forward(input);
                 mse.Forward(output, target);
                 mse.Backward();
 
-                Console.WriteLine(mse.LossValue);
+                stopwatch.Stop();
+
+                Console.WriteLine($"Epoch: {i}/{1000000}, Loss: {mse.LossValue}, Time: {stopwatch.ElapsedMilliseconds}ms");
 
                 layers.ApplyGrad();
             }    
