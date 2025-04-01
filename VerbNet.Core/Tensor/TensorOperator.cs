@@ -18,7 +18,8 @@ namespace VerbNet.Core
             Tensor aBroadcast, bBroadcast;
             (aBroadcast, bBroadcast) = Broadcast(a, b, buildGraph);
 
-            Tensor result = new Tensor(Operator.Add(aBroadcast.Data, bBroadcast.Data), aBroadcast.Shape, aBroadcast.RequiresGrad || bBroadcast.RequiresGrad);
+            bool requiresGrad = buildGraph ? (a.RequiresGrad || b.RequiresGrad) : false;
+            Tensor result = new Tensor(Operator.Add(aBroadcast.Data, bBroadcast.Data), aBroadcast.Shape, requiresGrad);
 
             if (buildGraph)
             {
@@ -42,7 +43,8 @@ namespace VerbNet.Core
             Tensor aBroadcast, bBroadcast;
             (aBroadcast, bBroadcast) = Broadcast(a, b, buildGraph);
 
-            Tensor result = new Tensor(Operator.Subtract(aBroadcast.Data, bBroadcast.Data), aBroadcast.Shape, aBroadcast.RequiresGrad || bBroadcast.RequiresGrad);
+            bool requiresGrad = buildGraph ? (a.RequiresGrad || b.RequiresGrad) : false;
+            Tensor result = new Tensor(Operator.Subtract(aBroadcast.Data, bBroadcast.Data), aBroadcast.Shape, requiresGrad);
 
             if (buildGraph)
             {
@@ -66,7 +68,8 @@ namespace VerbNet.Core
             Tensor aBroadcast, bBroadcast;
             (aBroadcast, bBroadcast) = Broadcast(a, b, buildGraph);
 
-            Tensor result = new Tensor(Operator.Multiply(aBroadcast.Data, bBroadcast.Data), aBroadcast.Shape, aBroadcast.RequiresGrad || bBroadcast.RequiresGrad);
+            bool requiresGrad = buildGraph ? (a.RequiresGrad || b.RequiresGrad) : false;
+            Tensor result = new Tensor(Operator.Multiply(aBroadcast.Data, bBroadcast.Data), aBroadcast.Shape, requiresGrad);
 
             if (buildGraph)
             {
@@ -90,7 +93,8 @@ namespace VerbNet.Core
             Tensor aBroadcast, bBroadcast;
             (aBroadcast, bBroadcast) = Broadcast(a, b, buildGraph);
 
-            Tensor result = new Tensor(Operator.Divide(aBroadcast.Data, bBroadcast.Data), aBroadcast.Shape, aBroadcast.RequiresGrad || bBroadcast.RequiresGrad);
+            bool requiresGrad = buildGraph ? (a.RequiresGrad || b.RequiresGrad) : false;
+            Tensor result = new Tensor(Operator.Divide(aBroadcast.Data, bBroadcast.Data), aBroadcast.Shape, requiresGrad);
 
             if (buildGraph)
             {
@@ -109,7 +113,8 @@ namespace VerbNet.Core
             if (a == null)
                 throw new ArgumentNullException(nameof(a));
 
-            Tensor result = new Tensor(Operator.Negate(a.Data), a.Shape, a.RequiresGrad);
+            bool requiresGrad = buildGraph ? a.RequiresGrad : false;
+            Tensor result = new Tensor(Operator.Negate(a.Data), a.Shape, requiresGrad);
 
             if (buildGraph)
             {
@@ -138,9 +143,8 @@ namespace VerbNet.Core
             int aCols = a.Shape[1];
             int bCols = b.Shape[1];
 
-           
-
-            Tensor result = new Tensor(Operator.MatMul(a.Data, b.Data, aRows, aCols, bCols), [aRows, bCols], a.RequiresGrad || b.RequiresGrad);
+            bool requiresGrad = buildGraph ? (a.RequiresGrad || b.RequiresGrad) : false;
+            Tensor result = new Tensor(Operator.MatMul(a.Data, b.Data, aRows, aCols, bCols), [aRows, bCols], requiresGrad);
 
             if (buildGraph)
             {
@@ -176,7 +180,8 @@ namespace VerbNet.Core
                 }
             });
 
-            Tensor result = new Tensor(newData, newShape, tensor.RequiresGrad);
+            bool requiresGrad = buildGraph ? tensor.RequiresGrad : false;
+            Tensor result = new Tensor(newData, newShape, requiresGrad);
 
             if (buildGraph)
             {

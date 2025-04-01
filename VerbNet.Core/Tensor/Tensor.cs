@@ -15,8 +15,6 @@ namespace VerbNet.Core
         public bool RequiresGrad;
         public Tensor Gradient;
         public Func<Tensor, Tensor, Tensor, (Tensor, Tensor)> GradFn;
-        public Dictionary<string, object> OpArgs;
-        public bool IsLeaf => LeftLeaf == null && RightLeaf == null;
         public Tensor Father;
         public Tensor LeftLeaf;
         public Tensor RightLeaf;
@@ -42,7 +40,6 @@ namespace VerbNet.Core
 
             RequiresGrad = requiresGrad;
             GradFn = null;
-            OpArgs = new Dictionary<string, object>();
             Father = null;
             LeftLeaf = null;
             RightLeaf = null;
@@ -76,7 +73,6 @@ namespace VerbNet.Core
 
             RequiresGrad = requiresGrad;
             GradFn = null;
-            OpArgs = new Dictionary<string, object>();
             Father = null;
             LeftLeaf = null;
             RightLeaf = null;
