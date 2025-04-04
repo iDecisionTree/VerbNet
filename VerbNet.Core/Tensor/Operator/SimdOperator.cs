@@ -153,70 +153,46 @@ namespace VerbNet.Core
 
         public static float[] MatMul(float[] a, float[] b, int aRows, int aCols, int bCols)
         {
-            const int blockSize = 64;
             float[] result = new float[aRows * bCols];
-            float[] bTransposed = TransposeMatrix(b, aCols, bCols);
+            float[] bTransposed = Transpose(b, aCols, bCols);
 
-            Parallel.ForEach(Partitioner.Create(0, aRows, blockSize), rowRange =>
+            Parallel.For(0, aRows, i =>
             {
-                var simdAccumulators = new Vector<float>[blockSize * blockSize];
-                int rowStart = rowRange.Item1;
-                int rowEnd = Math.Min(rowRange.Item2, aRows);
-
-                for (int kk = 0; kk < aCols; kk += blockSize)
+                for (int j = 0; j < bCols; j++)
                 {
-                    int kEnd = Math.Min(kk + blockSize, aCols);
-
-                    for (int jj = 0; jj < bCols; jj += blockSize)
+                    float sum = 0;
+                    int k = 0;
+                    for (; k <= aCols - Vector<float>.Count; k += Vector<float>.Count)
                     {
-                        int jEnd = Math.Min(jj + blockSize, bCols);
-
-                        for (int i = rowStart; i < rowEnd; i++)
-                        {
-                            for (int j = jj; j < jEnd; j += Vector<float>.Count)
-                            {
-                                int remaining = Math.Min(Vector<float>.Count, jEnd - j);
-                                Vector<float> sumVec = Vector<float>.Zero;
-
-                                for (int k = kk; k < kEnd; k++)
-                                {
-                                    Vector<float> aVec = new Vector<float>(a[i * aCols + k]);
-                                    Vector<float> bVec = new Vector<float>(bTransposed, j * aCols + k);
-                                    sumVec += aVec * bVec;
-                                }
-
-                                if (remaining == Vector<float>.Count)
-                                {
-                                    sumVec.CopyTo(result, i * bCols + j);
-                                }
-                                else
-                                {
-                                    for (int n = 0; n < remaining; n++)
-                                    {
-                                        result[i * bCols + j + n] += sumVec[n];
-                                    }
-                                }
-                            }
-                        }
+                        var aVec = new Vector<float>(a, i * aCols + k);
+                        var bVec = new Vector<float>(bTransposed, j * aCols + k);
+                        sum += Vector.Dot(aVec, bVec);
                     }
+                    for (; k < aCols; k++)
+                    {
+                        sum += a[i * aCols + k] * bTransposed[j * aCols + k];
+                    }
+                    result[i * bCols + j] = sum;
                 }
             });
 
             return result;
         }
 
-        private static float[] TransposeMatrix(float[] matrix, int rows, int cols)
+        public static float[] Transpose(float[] a, int rows, int cols)
         {
-            float[] transposed = new float[matrix.Length];
+            float[] result = new float[rows * cols];
             Parallel.For(0, rows, i =>
             {
                 for (int j = 0; j < cols; j++)
                 {
-                    transposed[j * rows + i] = matrix[i * cols + j];
+                    int sourceIndex = i * cols + j;
+                    int destIndex = j * rows + i;
+                    result[destIndex] = a[sourceIndex];
                 }
             });
 
-            return transposed;
+            return result;
         }
     }
 }
