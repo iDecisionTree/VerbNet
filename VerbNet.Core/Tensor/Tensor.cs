@@ -149,10 +149,7 @@
                 externalGradient = One;
             }
 
-            if (Gradient == null)
-                Gradient = externalGradient;
-            else
-                Gradient = TensorOperator.Add(Gradient, externalGradient, false);
+            Gradient = TensorOperator.Add(Gradient, externalGradient, false);
 
             if (GradFn != null)
             {
