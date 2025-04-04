@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace VerbNet.Core
+﻿namespace VerbNet.Core
 {
     public class MSELoss : LossFunction
     {
@@ -28,10 +22,10 @@ namespace VerbNet.Core
             {
                 LossValue += Loss.Data[i];
             }
-            if(HasBatch) 
+            if (HasBatch)
             {
                 LossValue = LossValue / delta.Shape[0];
-            } 
+            }
             else
             {
                 LossValue = LossValue / delta.Data.Length;

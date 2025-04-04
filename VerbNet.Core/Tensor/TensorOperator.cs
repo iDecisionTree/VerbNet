@@ -1,16 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace VerbNet.Core
+﻿namespace VerbNet.Core
 {
     public static class TensorOperator
     {
         public static Tensor Add(Tensor a, Tensor b, bool buildGraph = true)
         {
-            if (a == null) 
+            if (a == null)
                 throw new ArgumentNullException(nameof(a));
             if (b == null)
                 throw new ArgumentNullException(nameof(b));
@@ -195,7 +189,7 @@ namespace VerbNet.Core
 
         public static Tensor Repeat(Tensor tensor, int axis, int repeat = 2)
         {
-            if (tensor == null) 
+            if (tensor == null)
                 throw new ArgumentNullException(nameof(tensor));
             if (axis < 0 || axis >= tensor.Rank)
                 throw new ArgumentOutOfRangeException(nameof(axis), "Axis must be within the tensor's rank.");

@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace VerbNet.Core
+﻿namespace VerbNet.Core
 {
     public abstract class LossFunction
     {

@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace VerbNet.Core
+﻿namespace VerbNet.Core
 {
     public class Linear : Layer
     {
@@ -54,7 +48,7 @@ namespace VerbNet.Core
                 Weight.Data[i] -= Weight.Gradient.Data[i] * LearningRate;
             }
 
-            if(HasBias)
+            if (HasBias)
             {
                 for (int i = 0; i < Bias.Data.Length; i++)
                 {

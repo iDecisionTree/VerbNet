@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace VerbNet.Core
+﻿namespace VerbNet.Core
 {
     public static class GradFunction
     {
@@ -47,7 +41,7 @@ namespace VerbNet.Core
         public static (Tensor, Tensor) TransposeGradFn(Tensor gradient, Tensor leftLeaf, Tensor rightLeaf)
         {
             Tensor gradTransposed = TensorOperator.Transpose(gradient, false);
-           
+
             return (gradTransposed, null);
         }
     }

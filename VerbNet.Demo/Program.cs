@@ -34,7 +34,7 @@ namespace VerbNet.Demo
                 Console.WriteLine($"Epoch: {i}/{1000000}, Loss: {mse.LossValue}, Time: {stopwatch.ElapsedMilliseconds}ms");
 
                 layers.ApplyGrad();
-            }    
+            }
         }
     }
 }
