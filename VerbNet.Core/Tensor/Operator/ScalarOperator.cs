@@ -75,5 +75,21 @@
 
             return result;
         }
+
+        public static float[] Transpose(float[] a, int rows, int cols)
+        {
+            float[] result = new float[rows * cols];
+            Parallel.For(0, rows, i =>
+            {
+                for (int j = 0; j < cols; j++)
+                {
+                    int sourceIndex = i * cols + j;
+                    int destIndex = j * rows + i;
+                    result[destIndex] = a[sourceIndex];
+                }
+            });
+
+            return result;
+        }
     }
 }

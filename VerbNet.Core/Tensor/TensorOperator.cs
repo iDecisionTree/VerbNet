@@ -152,35 +152,21 @@
             return result;
         }
 
-        public static Tensor Transpose(Tensor tensor, bool buildGraph = true)
+        public static Tensor Transpose(Tensor a, bool buildGraph = true)
         {
-            if (tensor.Rank != 2)
+            if (a.Rank != 2)
                 throw new InvalidOperationException("Transpose requires a 2D tensor.");
 
-            int[] originalShape = tensor.Shape;
-            int rows = originalShape[0];
-            int cols = originalShape[1];
+            int rows = a.Shape[0];
+            int cols = a.Shape[1];
 
-            int[] newShape = [cols, rows];
-            float[] newData = new float[rows * cols];
-
-            Parallel.For(0, rows, i =>
-            {
-                for (int j = 0; j < cols; j++)
-                {
-                    int sourceIndex = i * cols + j;
-                    int destIndex = j * rows + i;
-                    newData[destIndex] = tensor.Data[sourceIndex];
-                }
-            });
-
-            bool requiresGrad = buildGraph ? tensor.RequiresGrad : false;
-            Tensor result = new Tensor(newData, newShape, requiresGrad);
+            bool requiresGrad = buildGraph ? a.RequiresGrad : false;
+            Tensor result = new Tensor(Operator.Transpose(a.Data, rows, cols), [cols, rows], requiresGrad);
 
             if (buildGraph)
             {
                 result.GradFn = GradFunction.TransposeGradFn;
-                result.LeftLeaf = tensor;
+                result.LeftLeaf = a;
                 result.LeftLeaf.Father = result;
             }
 

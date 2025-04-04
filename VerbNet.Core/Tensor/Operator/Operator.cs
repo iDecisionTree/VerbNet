@@ -1,4 +1,5 @@
 ﻿using System.Runtime.Intrinsics.X86;
+using static System.Reflection.Metadata.BlobBuilder;
 
 namespace VerbNet.Core
 {
@@ -67,6 +68,11 @@ namespace VerbNet.Core
         public static float[] MatMul(float[] a, float[] b, int aRows, int aCols, int bCols)
         {
             return ScalarOperator.MatMul(a, b, aRows, aCols, bCols);
+        }
+
+        public static float[] Transpose(float[] a, int rows, int cols)
+        {
+            return ScalarOperator.Transpose(a, rows, cols);
         }
     }
 }
