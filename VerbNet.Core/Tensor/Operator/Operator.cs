@@ -66,14 +66,7 @@ namespace VerbNet.Core
 
         public static float[] MatMul(float[] a, float[] b, int aRows, int aCols, int bCols)
         {
-            if (Avx.IsSupported)
-            {
-                return SimdOperator.MatMul(a, b, aRows, aCols, bCols);
-            }
-            else
-            {
-                return ScalarOperator.MatMul(a, b, aRows, aCols, bCols);
-            }
+            return ScalarOperator.MatMul(a, b, aRows, aCols, bCols);
         }
     }
 }
