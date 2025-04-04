@@ -185,6 +185,11 @@
             int[] newShape = tensor.Shape.ToArray();
             newShape[axis] *= repeat;
 
+            if (repeat == 1)
+            {
+                return Reshape(tensor, newShape);
+            }
+
             int outer = 1;
             for (int i = 0; i < axis; i++)
             {
@@ -200,7 +205,7 @@
 
             float[] newData = new float[outer * dim * repeat * inner];
 
-            for (int o = 0; o < outer; o++)
+            Parallel.For(0, outer, o =>
             {
                 int sourceOuterOffset = o * dim * inner;
                 int targetOuterOffset = o * dim * repeat * inner;
@@ -210,17 +215,19 @@
                     int sourceStart = sourceOuterOffset + d * inner;
                     int targetStartBase = targetOuterOffset + d * repeat * inner;
 
-                    for (int r = 0; r < repeat; r++)
+                    Array.Copy(tensor.Data, sourceStart, newData, targetStartBase, inner);
+
+                    int copied = 1;
+                    while (copied < repeat)
                     {
-                        int targetStart = targetStartBase + r * inner;
-                        Array.Copy(tensor.Data, sourceStart, newData, targetStart, inner);
+                        int toCopy = Math.Min(copied, repeat - copied);
+                        Array.Copy(newData, targetStartBase, newData, targetStartBase + copied * inner, toCopy * inner);
+                        copied += toCopy;
                     }
                 }
-            }
+            });
 
-            Tensor result = new Tensor(newData, newShape, tensor.RequiresGrad);
-
-            return result;
+            return new Tensor(newData, newShape, tensor.RequiresGrad);
         }
 
         public static Tensor Reshape(Tensor tensor, int[] newShape)
