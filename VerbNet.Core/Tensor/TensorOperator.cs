@@ -202,7 +202,26 @@
 
             if (buildGraph)
             {
-                result.GradFn = GradFunction.ExpEGradFn;
+                result.GradFn = GradFunction.ExpGradFn;
+                result.LeftLeaf = a;
+                result.LeftLeaf.Father = result;
+            }
+
+            return result;
+        }
+
+        public static Tensor Power(Tensor a, float exponent, bool buildGraph = true)
+        {
+            if (a == null)
+                throw new ArgumentNullException(nameof(a));
+
+            bool requiresGrad = buildGraph && a.RequiresGrad;
+            Tensor result = new Tensor(Operator.Power(a.Data, exponent), a.Shape, requiresGrad);
+
+            if (buildGraph)
+            {
+                result.GradFn = GradFunction.PowerGradFn;
+                result.OpArgs.Add("Power_exponent", exponent);
                 result.LeftLeaf = a;
                 result.LeftLeaf.Father = result;
             }

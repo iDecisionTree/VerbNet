@@ -112,6 +112,17 @@
             return result;
         }
 
+        public static float[] Power(float[] a, float exponent)
+        {
+            float[] result = new float[a.Length];
+            for (int i = 0; i < result.Length; i++)
+            {
+                result[i] = MathF.Pow(a[i], exponent);
+            }
+
+            return result;
+        }
+
         public static float[] Sin(float[] a)
         {
             float[] result = new float[a.Length];

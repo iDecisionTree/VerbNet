@@ -125,6 +125,11 @@ namespace VerbNet.Core
             }
         }
 
+        public static float[] Power(float[] a, float exponent)
+        {
+            return ScalarOperator.Power(a, exponent);
+        }
+
         public static float[] Sin(float[] a)
         {
             return ScalarOperator.Sin(a);

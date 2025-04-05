@@ -79,6 +79,17 @@
             return (grad, null);
         }
 
+        public static (Tensor, Tensor) PowerGradFn(Tensor gradient, Tensor leftLeaf, Tensor rightLeaf)
+        {
+            float exponent = (float)gradient.OpArgs["Power_exponent"];
+            Tensor powerTensor = new Tensor([exponent],[1], false);
+
+            Tensor leftPower = TensorOperator.Power(leftLeaf, exponent - 1f, false);
+            Tensor leftGrad = TensorOperator.Multiply(gradient, TensorOperator.Multiply(powerTensor, leftPower, false), false);
+
+            return (leftGrad, null);
+        }
+
         public static (Tensor, Tensor) SinGradFn(Tensor gradient, Tensor leftLeaf, Tensor rightLeaf)
         {
             Tensor cosX = TensorOperator.Cos(leftLeaf, false);
