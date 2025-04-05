@@ -12,7 +12,7 @@
             Tensor aBroadcast, bBroadcast;
             (aBroadcast, bBroadcast) = Broadcast(a, b, false);
 
-            bool requiresGrad = buildGraph ? (a.RequiresGrad || b.RequiresGrad) : false;
+            bool requiresGrad = buildGraph && (a.RequiresGrad || b.RequiresGrad);
             Tensor result = new Tensor(Operator.Add(aBroadcast.Data, bBroadcast.Data), aBroadcast.Shape, requiresGrad);
 
             if (buildGraph)
@@ -37,7 +37,7 @@
             Tensor aBroadcast, bBroadcast;
             (aBroadcast, bBroadcast) = Broadcast(a, b, false);
 
-            bool requiresGrad = buildGraph ? (a.RequiresGrad || b.RequiresGrad) : false;
+            bool requiresGrad = buildGraph && (a.RequiresGrad || b.RequiresGrad);
             Tensor result = new Tensor(Operator.Subtract(aBroadcast.Data, bBroadcast.Data), aBroadcast.Shape, requiresGrad);
 
             if (buildGraph)
@@ -62,7 +62,7 @@
             Tensor aBroadcast, bBroadcast;
             (aBroadcast, bBroadcast) = Broadcast(a, b, false);
 
-            bool requiresGrad = buildGraph ? (a.RequiresGrad || b.RequiresGrad) : false;
+            bool requiresGrad = buildGraph && (a.RequiresGrad || b.RequiresGrad);
             Tensor result = new Tensor(Operator.Multiply(aBroadcast.Data, bBroadcast.Data), aBroadcast.Shape, requiresGrad);
 
             if (buildGraph)
@@ -87,7 +87,7 @@
             Tensor aBroadcast, bBroadcast;
             (aBroadcast, bBroadcast) = Broadcast(a, b, false);
 
-            bool requiresGrad = buildGraph ? (a.RequiresGrad || b.RequiresGrad) : false;
+            bool requiresGrad = buildGraph && (a.RequiresGrad || b.RequiresGrad);
             Tensor result = new Tensor(Operator.Divide(aBroadcast.Data, bBroadcast.Data), aBroadcast.Shape, requiresGrad);
 
             if (buildGraph)
@@ -107,7 +107,7 @@
             if (a == null)
                 throw new ArgumentNullException(nameof(a));
 
-            bool requiresGrad = buildGraph ? a.RequiresGrad : false;
+            bool requiresGrad = buildGraph && a.RequiresGrad;
             Tensor result = new Tensor(Operator.Negate(a.Data), a.Shape, requiresGrad);
 
             if (buildGraph)
@@ -125,7 +125,7 @@
             if (a == null)
                 throw new ArgumentNullException(nameof(a));
 
-            bool requiresGrad = buildGraph ? a.RequiresGrad : false;
+            bool requiresGrad = buildGraph && a.RequiresGrad;
             Tensor result = new Tensor(Operator.Abs(a.Data), a.Shape, requiresGrad);
 
             if (buildGraph)
@@ -143,7 +143,7 @@
             if (a == null)
                 throw new ArgumentNullException(nameof(a));
 
-            bool requiresGrad = buildGraph ? a.RequiresGrad : false;
+            bool requiresGrad = buildGraph && a.RequiresGrad;
             Tensor result = new Tensor(Operator.Sign(a.Data), a.Shape, requiresGrad);
 
             if (buildGraph)
@@ -173,7 +173,7 @@
             int aCols = a.Shape[1];
             int bCols = b.Shape[1];
 
-            bool requiresGrad = buildGraph ? (a.RequiresGrad || b.RequiresGrad) : false;
+            bool requiresGrad = buildGraph && (a.RequiresGrad || b.RequiresGrad);
             Tensor result = new Tensor(Operator.MatMul(a.Data, b.Data, aRows, aCols, bCols), [aRows, bCols], requiresGrad);
 
             if (buildGraph)
@@ -196,7 +196,7 @@
             int rows = a.Shape[0];
             int cols = a.Shape[1];
 
-            bool requiresGrad = buildGraph ? a.RequiresGrad : false;
+            bool requiresGrad = buildGraph && a.RequiresGrad;
             Tensor result = new Tensor(Operator.Transpose(a.Data, rows, cols), [cols, rows], requiresGrad);
 
             if (buildGraph)
@@ -218,12 +218,24 @@
             if (repeat < 1)
                 throw new ArgumentOutOfRangeException(nameof(repeat), "Repeat must be at least 1.");
 
+            Tensor result;
             int[] newShape = a.Shape.ToArray();
             newShape[axis] *= repeat;
 
             if (repeat == 1)
             {
-                return Reshape(a, newShape);
+                result = Reshape(a, newShape, false);
+
+                if (buildGraph)
+                {
+                    result.GradFn = GradFunction.RepeatGradFn;
+                    result.OpArgs.Add("Repeat_axis", axis);
+                    result.OpArgs.Add("Repeat_repeat", repeat);
+                    result.LeftLeaf = a;
+                    result.LeftLeaf.Father = result;
+                }
+
+                return result;
             }
 
             int outer = 1;
@@ -262,9 +274,10 @@
                 }
             });
 
-            Tensor result = new Tensor(newData, newShape, a.RequiresGrad);
+            bool requiresGrad = a.RequiresGrad;
+            result = new Tensor(newData, newShape, requiresGrad);
 
-            if (buildGraph)
+            if (buildGraph && requiresGrad)
             {
                 result.GradFn = GradFunction.RepeatGradFn;
                 result.OpArgs.Add("Repeat_axis", axis);
@@ -276,20 +289,21 @@
             return result;
         }
 
-        public static Tensor Reshape(Tensor tensor, int[] newShape, bool buildGraph = true)
+        public static Tensor Reshape(Tensor a, int[] newShape, bool buildGraph = true)
         {
-            int length = tensor.Data.Length;
+            int length = a.Data.Length;
             int newLength = newShape.Aggregate(1, (a, b) => a * b);
 
             if (length != newLength)
-                throw new ArgumentException($"Cannot reshape tensor from [{string.Join(", ", tensor.Shape)}] to [{string.Join(", ", newShape)}]");
+                throw new ArgumentException($"Cannot reshape tensor from [{string.Join(", ", a.Shape)}] to [{string.Join(", ", newShape)}]");
 
-            Tensor result = new Tensor(tensor.Data, newShape, tensor.RequiresGrad);
+            bool requiresGrad = a.RequiresGrad;
+            Tensor result = new Tensor(a.Data, newShape, requiresGrad);
 
-            if (buildGraph)
+            if (buildGraph && requiresGrad)
             {
                 result.GradFn = GradFunction.ReshapeGradFn;
-                result.LeftLeaf = tensor;
+                result.LeftLeaf = a;
                 result.LeftLeaf.Father = result;
             }
 
@@ -419,9 +433,10 @@
                 broadcastData[linearIndex] = tensor.Data[originalIndex];
             });
 
-            Tensor result = new Tensor(broadcastData, targetShape, tensor.RequiresGrad);
+            bool requiresGrad = tensor.RequiresGrad;
+            Tensor result = new Tensor(broadcastData, targetShape, requiresGrad);
 
-            if (buildGraph)
+            if (buildGraph && requiresGrad)
             {
                 result.GradFn = GradFunction.BroadcastGradFn;
                 result.OpArgs["Broadcast_targetShape"] = targetShape;
