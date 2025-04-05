@@ -19,56 +19,7 @@
 - [ ] 增加更多的神经网络层。
 
 ## 使用示例
-以下是一个简单的示例，展示如何使用 `VerbNet` 构建和训练一个简单的神经网络：
-
-```csharp
-using VerbNet.Core;
-
-namespace VerbNet.Demo
-{
-    internal class Program
-    {
-        static void Main(string[] args)
-        {
-            // 定义神经网络层
-            LayerList layers = new LayerList(
-                new Linear(16, 512, true, 0.001f),
-                new Linear(512, 512, true, 0.001f),
-                new Linear(512, 16, true, 0.001f)
-            );
-
-            // 定义损失函数
-            MSELoss mse = new MSELoss(true);
-
-            // 生成随机输入和目标数据
-            Tensor input = Tensor.Random([64, 16]);
-            Tensor target = Tensor.Random([64, 16]);
-
-            // 训练循环
-            for (int i = 0; i < 1000000; i++)
-            {
-                // 清零梯度
-                layers.ZeroGrad();
-
-                // 前向传播
-                Tensor output = layers.Forward(input);
-
-                // 计算损失
-                mse.Forward(output, target);
-
-                // 反向传播
-                mse.Backward();
-
-                // 打印损失值
-                Console.WriteLine(mse.LossValue);
-
-                // 更新参数
-                layers.ApplyGrad();
-            }
-        }
-    }
-}
-```
+详见`VerbNet.Demo`
 
 ## 许可证
 该项目采用 Apache License 2.0 许可证。详细信息请参阅 [LICENSE.txt](LICENSE.txt) 文件。
