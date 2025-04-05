@@ -101,6 +101,18 @@ namespace VerbNet.Core
             }
         }
 
+        public static float[] LogE(float[] a)
+        {
+            if (Avx.IsSupported)
+            {
+                return SimdOperator.LogE(a);
+            }
+            else
+            {
+                return ScalarOperator.LogE(a);
+            }
+        }
+
         public static float[] Sin(float[] a)
         {
             return ScalarOperator.Sin(a);

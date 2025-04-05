@@ -63,6 +63,14 @@
             return (grad, null);
         }
 
+        public static (Tensor, Tensor) LogEGradFn(Tensor gradient, Tensor leftLeaf, Tensor rightLeaf)
+        {
+            Tensor reciprocal = TensorOperator.Divide(Tensor.One, leftLeaf, false);
+            Tensor grad = TensorOperator.Multiply(gradient, reciprocal, false);
+
+            return (grad, null);
+        }
+
         public static (Tensor, Tensor) SinGradFn(Tensor gradient, Tensor leftLeaf, Tensor rightLeaf)
         {
             Tensor cosX = TensorOperator.Cos(leftLeaf, false);

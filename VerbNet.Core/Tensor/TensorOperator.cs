@@ -174,6 +174,24 @@
             return result;
         }
 
+        public static Tensor LogE(Tensor a, bool buildGraph = true)
+        {
+            if (a == null)
+                throw new ArgumentNullException(nameof(a));
+
+            bool requiresGrad = buildGraph && a.RequiresGrad;
+            Tensor result = new Tensor(Operator.LogE(a.Data), a.Shape, requiresGrad);
+
+            if (buildGraph)
+            {
+                result.GradFn = GradFunction.LogEGradFn;
+                result.LeftLeaf = a;
+                result.LeftLeaf.Father = result;
+            }
+
+            return result;
+        }
+
         public static Tensor Sin(Tensor a, bool buildGraph = true)
         {
             if (a == null)

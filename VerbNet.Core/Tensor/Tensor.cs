@@ -141,6 +141,8 @@ namespace VerbNet.Core
 
         public static Tensor Abs(Tensor a) => TensorOperator.Abs(a, true);
         public static Tensor Sign(Tensor a) => TensorOperator.Sign(a, true);
+        public static Tensor Sqrt(Tensor a) => TensorOperator.Sqrt(a, true);
+        public static Tensor LogE(Tensor a) => TensorOperator.LogE(a, true);
         public static Tensor Sin(Tensor a) => TensorOperator.Sin(a, true);
         public static Tensor Cos(Tensor a) => TensorOperator.Cos(a, true);
         public static Tensor Tan(Tensor a) => TensorOperator.Tan(a, true);

@@ -90,6 +90,17 @@
             return result;
         }
 
+        public static float[] LogE(float[] a)
+        {
+            float[] result = new float[a.Length];
+            for (int i = 0; i < result.Length; i++)
+            {
+                result[i] = MathF.Log(a[i]);
+            }
+
+            return result;
+        }
+
         public static float[] Sin(float[] a)
         {
             float[] result = new float[a.Length];
