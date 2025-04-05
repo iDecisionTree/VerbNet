@@ -113,6 +113,18 @@ namespace VerbNet.Core
             }
         }
 
+        public static float[] Exp(float[] a)
+        {
+            if (Avx.IsSupported)
+            {
+                return SimdOperator.Exp(a);
+            }
+            else
+            {
+                return ScalarOperator.Exp(a);
+            }
+        }
+
         public static float[] Sin(float[] a)
         {
             return ScalarOperator.Sin(a);

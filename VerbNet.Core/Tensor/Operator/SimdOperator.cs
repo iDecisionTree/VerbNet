@@ -273,6 +273,34 @@ namespace VerbNet.Core
             return result;
         }
 
+        public static float[] Exp(float[] a)
+        {
+            float[] result = new float[a.Length];
+
+            const int chunkSize = 4096;
+            Parallel.ForEach(Partitioner.Create(0, result.Length, chunkSize), range =>
+            {
+                int start = range.Item1;
+                int end = range.Item2;
+
+                int simdEnd = start + ((end - start) / VECTOR_SIZE) * VECTOR_SIZE;
+                for (int i = start; i < simdEnd; i += VECTOR_SIZE)
+                {
+                    Vector<float> aVec = new Vector<float>(a, i);
+                    Vector<float> resultVec = Vector.Exp(aVec);
+                    resultVec.CopyTo(result, i);
+                }
+                start = simdEnd;
+
+                for (int i = start; i < end; i++)
+                {
+                    result[i] = MathF.Exp(a[i]);
+                }
+            });
+
+            return result;
+        }
+
         public static float[] MatMul(float[] a, float[] b, int aRows, int aCols, int bCols)
         {
             float[] result = new float[aRows * bCols];

@@ -71,6 +71,14 @@
             return (grad, null);
         }
 
+        public static (Tensor, Tensor) ExpGradFn(Tensor gradient, Tensor leftLeaf, Tensor rightLeaf)
+        {
+            Tensor expX = TensorOperator.Exp(leftLeaf, false);
+            Tensor grad = TensorOperator.Multiply(gradient, expX, false);
+
+            return (grad, null);
+        }
+
         public static (Tensor, Tensor) SinGradFn(Tensor gradient, Tensor leftLeaf, Tensor rightLeaf)
         {
             Tensor cosX = TensorOperator.Cos(leftLeaf, false);
