@@ -4,7 +4,7 @@
     {
         public float[] Data;
         public int[] Shape;
-        public int Rank;
+        public int Rank => Shape.Length;
 
         public bool RequiresGrad;
         public Tensor Gradient;
@@ -13,8 +13,8 @@
         public Tensor LeftLeaf;
         public Tensor RightLeaf;
 
-        public static Tensor Zero = new Tensor([0f], [1], false);
-        public static Tensor One = new Tensor([1f], [1], false);
+        public readonly static Tensor Zero = new Tensor([0f], [1], false);
+        public readonly static Tensor One = new Tensor([1f], [1], false);
 
         public Tensor(int[] shape, bool requiresGrad = false)
         {
@@ -30,7 +30,6 @@
 
             Data = new float[shape.Aggregate((a, b) => a * b)];
             Shape = (int[])shape.Clone();
-            Rank = shape.Length;
 
             RequiresGrad = requiresGrad;
             GradFn = null;
@@ -63,7 +62,6 @@
 
             Data = (float[])data.Clone();
             Shape = (int[])shape.Clone();
-            Rank = shape.Length;
 
             RequiresGrad = requiresGrad;
             GradFn = null;
@@ -108,6 +106,7 @@
             {
                 if (indices.Length != Rank)
                 {
+                    throw new ArgumentException($"Index count must equal the tensor's rank {Rank}");
                 }
 
                 int index = 0;
@@ -171,6 +170,32 @@
                     RightLeaf.Backward(rightGrad);
                 }
             }
+        }
+
+        public Tensor Copy()
+        {
+            float[] dataCopy = (float[])Data.Clone();
+            int[] shapeCopy = (int[])Shape.Clone();
+            bool requiresGrad = RequiresGrad;
+            Tensor gradientCopy = null;
+            if (requiresGrad)
+            {
+                gradientCopy = Gradient.Copy();
+            }
+
+            Tensor copy = new Tensor()
+            {
+                Data = dataCopy,
+                Shape = shapeCopy,
+                RequiresGrad = requiresGrad,
+                Gradient = gradientCopy,
+                GradFn = null,
+                Father = null,
+                LeftLeaf = null,
+                RightLeaf = null
+            };
+
+            return copy;
         }
     }
 }
