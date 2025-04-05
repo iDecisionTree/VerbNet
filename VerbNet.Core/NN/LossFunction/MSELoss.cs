@@ -18,17 +18,18 @@
                 Loss /= new Tensor([delta.Shape[0]], [1], false);
             }
 
+            LossValue = 0f;
             for (int i = 0; i < Loss.Data.Length; i++)
             {
                 LossValue += Loss.Data[i];
             }
             if (HasBatch)
             {
-                LossValue = LossValue / delta.Shape[0];
+                LossValue /= delta.Shape[0];
             }
             else
             {
-                LossValue = LossValue / delta.Data.Length;
+                LossValue /= delta.Data.Length;
             }
         }
 
