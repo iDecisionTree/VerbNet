@@ -116,5 +116,12 @@
 
             return (reshapedGradient, null);
         }
+
+        public static (Tensor, Tensor) BroadcastGradFn(Tensor gradient, Tensor leftLeaf, Tensor rightLeaf)
+        {
+            int[] originalShape = (int[])gradient.OpArgs["OriginalShape"];
+
+            return (TensorOperator.Reshape(gradient, originalShape, false), null);
+        }
     }
 }

@@ -355,37 +355,85 @@
             return reversedResult.ToArray();
         }
 
-        public static Tensor BroadcastTo(Tensor tensor, int[] targetShape)
+        public static Tensor BroadcastTo(Tensor tensor, int[] targetShape, bool buildGraph = true)
         {
-            int[] broadcastedShape = GetBroadcastShape(tensor.Shape, targetShape);
+            if (tensor == null)
+                throw new ArgumentNullException(nameof(tensor));
+            if (targetShape == null)
+                throw new ArgumentNullException(nameof(targetShape));
 
+            int[] broadcastedShape = GetBroadcastShape(tensor.Shape, targetShape);
             if (!Enumerable.SequenceEqual(broadcastedShape, targetShape))
                 throw new ArgumentException($"Cannot broadcast tensor from shape [{string.Join(", ", tensor.Shape)}] to [{string.Join(", ", targetShape)}]");
 
+            if (Enumerable.SequenceEqual(tensor.Shape, targetShape))
+                return new Tensor((float[])tensor.Data.Clone(), targetShape, tensor.RequiresGrad);
+
             int targetRank = targetShape.Length;
             int tensorRank = tensor.Shape.Length;
-            int padLength = targetRank - tensorRank;
-
-            int[] paddedShape = new int[targetRank];
+            int[] paddedTensorShape = new int[targetRank];
             for (int i = 0; i < targetRank; i++)
             {
-                paddedShape[i] = (i < padLength) ? 1 : tensor.Shape[i - padLength];
+                paddedTensorShape[i] = (i < targetRank - tensorRank) ? 1 : tensor.Shape[i - (targetRank - tensorRank)];
             }
 
-            Tensor current = Reshape(tensor, paddedShape);
-
-            for (int i = 0; i < targetRank; i++)
+            int[] tensorStrides = new int[targetRank];
+            int stride = 1;
+            for (int i = targetRank - 1; i >= 0; i--)
             {
-                if (current.Shape[i] == 1 && targetShape[i] > 1)
+                tensorStrides[i] = paddedTensorShape[i] == 1 ? 0 : stride;
+                stride *= paddedTensorShape[i];
+            }
+
+            int[] targetStrides = new int[targetRank];
+            stride = 1;
+            for (int i = targetRank - 1; i >= 0; i--)
+            {
+                targetStrides[i] = stride;
+                stride *= targetShape[i];
+            }
+
+            int totalElements = targetShape.Aggregate(1, (a, b) => a * b);
+            float[] broadcastData = new float[totalElements];
+
+            Parallel.For(0, totalElements, linearIndex =>
+            {
+                int originalIndex = 0;
+                int remaining = linearIndex;
+
+                for (int dim = 0; dim < targetRank; dim++)
                 {
-                    current = Repeat(current, i, targetShape[i]);
+                    int targetSize = targetShape[dim];
+                    int tensorSize = paddedTensorShape[dim];
+
+                    int coord = remaining / targetStrides[dim];
+                    remaining %= targetStrides[dim];
+
+                    if (tensorSize != 1)
+                    {
+                        coord %= tensorSize;
+                        originalIndex += coord * tensorStrides[dim];
+                    }
                 }
+
+                broadcastData[linearIndex] = tensor.Data[originalIndex];
+            });
+
+            Tensor result = new Tensor(broadcastData, targetShape, tensor.RequiresGrad);
+
+            if (buildGraph)
+            {
+                result.GradFn = GradFunction.BroadcastGradFn;
+                result.OpArgs["Broadcast_targetShape"] = targetShape;
+                result.OpArgs["Broadcast_originalShape"] = tensor.Shape;
+                result.LeftLeaf = tensor;
+                result.LeftLeaf.Father = result;
             }
 
-            return current;
+            return result;
         }
 
-        public static (Tensor, Tensor) Broadcast(Tensor a, Tensor b, bool buildGraph)
+        public static (Tensor, Tensor) Broadcast(Tensor a, Tensor b, bool buildGraph = true)
         {
             int[] broadcastShape = GetBroadcastShape(a.Shape, b.Shape);
             Tensor aBroadcast = BroadcastTo(a, broadcastShape);
