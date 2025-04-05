@@ -209,38 +209,37 @@
             return result;
         }
 
-        public static Tensor Repeat(Tensor tensor, int axis, int repeat = 2)
+        public static Tensor Repeat(Tensor a, int axis, int repeat = 2, bool buildGraph = true)
         {
-            if (tensor == null)
-                throw new ArgumentNullException(nameof(tensor));
-            if (axis < 0 || axis >= tensor.Rank)
+            if (a == null)
+                throw new ArgumentNullException(nameof(a));
+            if (axis < 0 || axis >= a.Rank)
                 throw new ArgumentOutOfRangeException(nameof(axis), "Axis must be within the tensor's rank.");
             if (repeat < 1)
                 throw new ArgumentOutOfRangeException(nameof(repeat), "Repeat must be at least 1.");
 
-            int[] newShape = tensor.Shape.ToArray();
+            int[] newShape = a.Shape.ToArray();
             newShape[axis] *= repeat;
 
             if (repeat == 1)
             {
-                return Reshape(tensor, newShape);
+                return Reshape(a, newShape);
             }
 
             int outer = 1;
             for (int i = 0; i < axis; i++)
             {
-                outer *= tensor.Shape[i];
+                outer *= a.Shape[i];
             }
 
-            int dim = tensor.Shape[axis];
+            int dim = a.Shape[axis];
             int inner = 1;
-            for (int i = axis + 1; i < tensor.Rank; i++)
+            for (int i = axis + 1; i < a.Rank; i++)
             {
-                inner *= tensor.Shape[i];
+                inner *= a.Shape[i];
             }
 
             float[] newData = new float[outer * dim * repeat * inner];
-
             Parallel.For(0, outer, o =>
             {
                 int sourceOuterOffset = o * dim * inner;
@@ -251,7 +250,7 @@
                     int sourceStart = sourceOuterOffset + d * inner;
                     int targetStartBase = targetOuterOffset + d * repeat * inner;
 
-                    Array.Copy(tensor.Data, sourceStart, newData, targetStartBase, inner);
+                    Array.Copy(a.Data, sourceStart, newData, targetStartBase, inner);
 
                     int copied = 1;
                     while (copied < repeat)
@@ -263,18 +262,36 @@
                 }
             });
 
-            return new Tensor(newData, newShape, tensor.RequiresGrad);
+            Tensor result = new Tensor(newData, newShape, a.RequiresGrad);
+
+            if (buildGraph)
+            {
+                result.GradFn = GradFunction.RepeatGradFn;
+                result.OpArgs.Add("Repeat_axis", axis);
+                result.OpArgs.Add("Repeat_repeat", repeat);
+                result.LeftLeaf = a;
+                result.LeftLeaf.Father = result;
+            }
+
+            return result;
         }
 
-        public static Tensor Reshape(Tensor tensor, int[] newShape)
+        public static Tensor Reshape(Tensor tensor, int[] newShape, bool buildGraph = true)
         {
-            int totalElements = tensor.Data.Length;
-            int newTotal = newShape.Aggregate(1, (a, b) => a * b);
+            int length = tensor.Data.Length;
+            int newLength = newShape.Aggregate(1, (a, b) => a * b);
 
-            if (totalElements != newTotal)
+            if (length != newLength)
                 throw new ArgumentException($"Cannot reshape tensor from [{string.Join(", ", tensor.Shape)}] to [{string.Join(", ", newShape)}]");
 
             Tensor result = new Tensor(tensor.Data, newShape, tensor.RequiresGrad);
+
+            if (buildGraph)
+            {
+                result.GradFn = GradFunction.ReshapeGradFn;
+                result.LeftLeaf = tensor;
+                result.LeftLeaf.Father = result;
+            }
 
             return result;
         }

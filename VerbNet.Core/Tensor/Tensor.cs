@@ -1,4 +1,6 @@
-﻿namespace VerbNet.Core
+﻿using System.Runtime.InteropServices;
+
+namespace VerbNet.Core
 {
     public class Tensor
     {
@@ -9,6 +11,7 @@
         public bool RequiresGrad;
         public Tensor Gradient;
         public Func<Tensor, Tensor, Tensor, (Tensor, Tensor)> GradFn;
+        public Dictionary<string, object> OpArgs;
         public Tensor Father;
         public Tensor LeftLeaf;
         public Tensor RightLeaf;
@@ -33,6 +36,7 @@
 
             RequiresGrad = requiresGrad;
             GradFn = null;
+            OpArgs = new Dictionary<string, object>();
             Father = null;
             LeftLeaf = null;
             RightLeaf = null;
@@ -65,6 +69,7 @@
 
             RequiresGrad = requiresGrad;
             GradFn = null;
+            OpArgs = new Dictionary<string, object>();
             Father = null;
             LeftLeaf = null;
             RightLeaf = null;
@@ -131,8 +136,8 @@
         public static Tensor operator /(Tensor a, Tensor b) => TensorOperator.Divide(a, b, true);
         public static Tensor operator -(Tensor a) => TensorOperator.Negate(a, true);
 
-        public Tensor Repeat(int axis, int repeat = 2) => TensorOperator.Repeat(this, axis, repeat);
-        public Tensor Reshape(int[] shape) => TensorOperator.Reshape(this, shape);
+        public Tensor Repeat(int axis, int repeat = 2) => TensorOperator.Repeat(this, axis, repeat, true);
+        public Tensor Reshape(int[] shape) => TensorOperator.Reshape(this, shape, true);
 
         public static Tensor Abs(Tensor a) => TensorOperator.Abs(a, true);
         public static Tensor Sign(Tensor a) => TensorOperator.Sign(a, true);
@@ -190,6 +195,7 @@
                 RequiresGrad = requiresGrad,
                 Gradient = gradientCopy,
                 GradFn = null,
+                OpArgs = new Dictionary<string, object>(),
                 Father = null,
                 LeftLeaf = null,
                 RightLeaf = null
