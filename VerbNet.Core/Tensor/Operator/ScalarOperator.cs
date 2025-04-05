@@ -79,6 +79,72 @@
             return result;
         }
 
+        public static float[] Sin(float[] a)
+        {
+            float[] result = new float[a.Length];
+            for (int i = 0; i < result.Length; i++)
+            {
+                result[i] = MathF.Sin(a[i]);
+            }
+
+            return result;
+        }
+
+        public static float[] Cos(float[] a)
+        {
+            float[] result = new float[a.Length];
+            for (int i = 0; i < result.Length; i++)
+            {
+                result[i] = MathF.Cos(a[i]);
+            }
+
+            return result;
+        }
+
+        public static float[] Tan(float[] a)
+        {
+            float[] result = new float[a.Length];
+            for (int i = 0; i < result.Length; i++)
+            {
+                result[i] = MathF.Tan(a[i]);
+            }
+
+            return result;
+        }
+
+        public static float[] Sinh(float[] a)
+        {
+            float[] result = new float[a.Length];
+            for (int i = 0; i < result.Length; i++)
+            {
+                result[i] = MathF.Sinh(a[i]);
+            }
+
+            return result;
+        }
+
+        public static float[] Cosh(float[] a)
+        {
+            float[] result = new float[a.Length];
+            for (int i = 0; i < result.Length; i++)
+            {
+                result[i] = MathF.Cosh(a[i]);
+            }
+
+            return result;
+        }
+
+        public static float[] Tanh(float[] a)
+        {
+            float[] result = new float[a.Length];
+            for (int i = 0; i < result.Length; i++)
+            {
+                result[i] = MathF.Tanh(a[i]);
+            }
+
+            return result;
+        }
+
         public static float[] MatMul(float[] a, float[] b, int aRows, int aCols, int bCols)
         {
             float[] result = new float[aRows * bCols];

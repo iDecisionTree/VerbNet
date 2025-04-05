@@ -37,6 +37,59 @@
             return (Tensor.Zero, null);
         }
 
+        public static (Tensor, Tensor) SinGradFn(Tensor gradient, Tensor leftLeaf, Tensor rightLeaf)
+        {
+            Tensor cosX = TensorOperator.Cos(leftLeaf, false);
+            Tensor grad = TensorOperator.Multiply(gradient, cosX, false);
+
+            return (grad, null);
+        }
+
+        public static (Tensor, Tensor) CosGradFn(Tensor gradient, Tensor leftLeaf, Tensor rightLeaf)
+        {
+            Tensor sinX = TensorOperator.Sin(leftLeaf, false);
+            Tensor negSinX = TensorOperator.Negate(sinX, false);
+            Tensor grad = TensorOperator.Multiply(gradient, negSinX, false);
+
+            return (grad, null);
+        }
+
+        public static (Tensor, Tensor) TanGradFn(Tensor gradient, Tensor leftLeaf, Tensor rightLeaf)
+        {
+            Tensor cosX = TensorOperator.Cos(leftLeaf, false);
+            Tensor secSquared = TensorOperator.Multiply(cosX, cosX, false);
+            Tensor invSecSquared = TensorOperator.Divide(Tensor.One, secSquared, false);  // 1/cos²(x)
+            Tensor grad = TensorOperator.Multiply(gradient, invSecSquared, false);
+
+            return (grad, null);
+        }
+
+        public static (Tensor, Tensor) SinhGradFn(Tensor gradient, Tensor leftLeaf, Tensor rightLeaf)
+        {
+            Tensor coshX = TensorOperator.Cosh(leftLeaf, false);
+            Tensor grad = TensorOperator.Multiply(gradient, coshX, false);
+
+            return (grad, null);
+        }
+
+        public static (Tensor, Tensor) CoshGradFn(Tensor gradient, Tensor leftLeaf, Tensor rightLeaf)
+        {
+            Tensor sinhX = TensorOperator.Sinh(leftLeaf, false);
+            Tensor grad = TensorOperator.Multiply(gradient, sinhX, false);
+
+            return (grad, null);
+        }
+
+        public static (Tensor, Tensor) TanhGradFn(Tensor gradient, Tensor leftLeaf, Tensor rightLeaf)
+        {
+            Tensor tanhX = TensorOperator.Tanh(leftLeaf, false);
+            Tensor tanhSquared = TensorOperator.Multiply(tanhX, tanhX, false);
+            Tensor oneMinusTanhSquared = TensorOperator.Subtract(Tensor.One, tanhSquared, false);
+            Tensor grad = TensorOperator.Multiply(gradient, oneMinusTanhSquared, false);
+            
+            return (grad, null);
+        }
+
         public static (Tensor, Tensor) MatMulGradFn(Tensor gradient, Tensor leftLeaf, Tensor rightLeaf)
         {
             Tensor bTransposed = TensorOperator.Transpose(rightLeaf, false);

@@ -156,6 +156,114 @@
             return result;
         }
 
+        public static Tensor Sin(Tensor a, bool buildGraph = true)
+        {
+            if (a == null)
+                throw new ArgumentNullException(nameof(a));
+
+            bool requiresGrad = buildGraph && a.RequiresGrad;
+            Tensor result = new Tensor(Operator.Sin(a.Data), a.Shape, requiresGrad);
+
+            if (buildGraph)
+            {
+                result.GradFn = GradFunction.SinGradFn;
+                result.LeftLeaf = a;
+                result.LeftLeaf.Father = result;
+            }
+
+            return result;
+        }
+
+        public static Tensor Cos(Tensor a, bool buildGraph = true)
+        {
+            if (a == null)
+                throw new ArgumentNullException(nameof(a));
+
+            bool requiresGrad = buildGraph && a.RequiresGrad;
+            Tensor result = new Tensor(Operator.Cos(a.Data), a.Shape, requiresGrad);
+
+            if (buildGraph)
+            {
+                result.GradFn = GradFunction.CosGradFn;
+                result.LeftLeaf = a;
+                result.LeftLeaf.Father = result;
+            }
+
+            return result;
+        }
+
+        public static Tensor Tan(Tensor a, bool buildGraph = true)
+        {
+            if (a == null)
+                throw new ArgumentNullException(nameof(a));
+
+            bool requiresGrad = buildGraph && a.RequiresGrad;
+            Tensor result = new Tensor(Operator.Tan(a.Data), a.Shape, requiresGrad);
+
+            if (buildGraph)
+            {
+                result.GradFn = GradFunction.TanGradFn;
+                result.LeftLeaf = a;
+                result.LeftLeaf.Father = result;
+            }
+
+            return result;
+        }
+
+        public static Tensor Sinh(Tensor a, bool buildGraph = true)
+        {
+            if (a == null)
+                throw new ArgumentNullException(nameof(a));
+
+            bool requiresGrad = buildGraph && a.RequiresGrad;
+            Tensor result = new Tensor(Operator.Sinh(a.Data), a.Shape, requiresGrad);
+
+            if (buildGraph)
+            {
+                result.GradFn = GradFunction.SinhGradFn;
+                result.LeftLeaf = a;
+                result.LeftLeaf.Father = result;
+            }
+
+            return result;
+        }
+
+        public static Tensor Cosh(Tensor a, bool buildGraph = true)
+        {
+            if (a == null)
+                throw new ArgumentNullException(nameof(a));
+
+            bool requiresGrad = buildGraph && a.RequiresGrad;
+            Tensor result = new Tensor(Operator.Cosh(a.Data), a.Shape, requiresGrad);
+
+            if (buildGraph)
+            {
+                result.GradFn = GradFunction.CoshGradFn;
+                result.LeftLeaf = a;
+                result.LeftLeaf.Father = result;
+            }
+
+            return result;
+        }
+
+        public static Tensor Tanh(Tensor a, bool buildGraph = true)
+        {
+            if (a == null)
+                throw new ArgumentNullException(nameof(a));
+
+            bool requiresGrad = buildGraph && a.RequiresGrad;
+            Tensor result = new Tensor(Operator.Tanh(a.Data), a.Shape, requiresGrad);
+
+            if (buildGraph)
+            {
+                result.GradFn = GradFunction.TanhGradFn;
+                result.LeftLeaf = a;
+                result.LeftLeaf.Father = result;
+            }
+
+            return result;
+        }
+
         public static Tensor MatMul(Tensor a, Tensor b, bool buildGraph = true)
         {
             if (a == null)

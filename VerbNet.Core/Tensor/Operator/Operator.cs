@@ -89,6 +89,36 @@ namespace VerbNet.Core
             }
         }
 
+        public static float[] Sin(float[] a)
+        {
+            return ScalarOperator.Sin(a);
+        }
+
+        public static float[] Cos(float[] a)
+        {
+            return ScalarOperator.Cos(a);
+        }
+
+        public static float[] Tan(float[] a)
+        {
+            return ScalarOperator.Tan(a);
+        }
+
+        public static float[] Sinh(float[] a)
+        {
+            return ScalarOperator.Sinh(a);
+        }
+
+        public static float[] Cosh(float[] a)
+        {
+            return ScalarOperator.Cosh(a);
+        }
+
+        public static float[] Tanh(float[] a)
+        {
+            return ScalarOperator.Tanh(a);
+        }
+
         public static float[] MatMul(float[] a, float[] b, int aRows, int aCols, int bCols)
         {
             if (Avx.IsSupported)
