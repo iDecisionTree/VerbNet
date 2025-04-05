@@ -8,14 +8,14 @@ namespace VerbNet.Core
 {
     public abstract class ActivationFunction : Layer
     {
-        public override void ZeroGrad()
+        public override void ApplyGrad()
         {
             
         }
 
-        public override void ApplyGrad()
+        public override void ZeroGrad()
         {
-            
+
         }
     }
 }

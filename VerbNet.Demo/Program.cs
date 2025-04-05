@@ -10,7 +10,8 @@ namespace VerbNet.Demo
             LayerList layers = new LayerList(
                 new Linear(64, 1024, true, 0.01f),
                 new Linear(1024, 1024, true, 0.001f),
-                new Linear(1024, 1, true, 0.01f)
+                new Linear(1024, 1, true, 0.01f),
+                new Tanh()
                 );
             MSELoss mse = new MSELoss(true);
 
