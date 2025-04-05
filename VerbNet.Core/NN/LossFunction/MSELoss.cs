@@ -12,7 +12,7 @@
         public override void Forward(Tensor pred, Tensor target)
         {
             Tensor delta = pred - target;
-            Loss = delta * delta;
+            Loss = Tensor.Pow(delta, 2f);
             if (HasBatch)
             {
                 Loss /= new Tensor([delta.Shape[0]], [1], false);

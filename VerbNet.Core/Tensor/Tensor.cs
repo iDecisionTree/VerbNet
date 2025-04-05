@@ -10,7 +10,7 @@ namespace VerbNet.Core
 
         public bool RequiresGrad;
         public Tensor Gradient;
-        public Func<Tensor, Tensor, Tensor, (Tensor, Tensor)> GradFn;
+        public Func<Tensor, Tensor, Tensor, Dictionary<string, object>, (Tensor, Tensor)> GradFn;
         public Dictionary<string, object> OpArgs;
         public Tensor Father;
         public Tensor LeftLeaf;
@@ -170,7 +170,7 @@ namespace VerbNet.Core
 
             if (GradFn != null)
             {
-                (Tensor leftGrad, Tensor rightGrad) = GradFn(Gradient, LeftLeaf, RightLeaf);
+                (Tensor leftGrad, Tensor rightGrad) = GradFn(Gradient, LeftLeaf, RightLeaf, OpArgs);
 
                 if (LeftLeaf != null && LeftLeaf.RequiresGrad)
                 {
