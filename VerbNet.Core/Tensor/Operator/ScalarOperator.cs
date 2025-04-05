@@ -79,6 +79,17 @@
             return result;
         }
 
+        public static float[] Sqrt(float[] a)
+        {
+            float[] result = new float[a.Length];
+            for (int i = 0; i < result.Length; i++)
+            {
+                result[i] = MathF.Sqrt(a[i]);
+            }
+
+            return result;
+        }
+
         public static float[] Sin(float[] a)
         {
             float[] result = new float[a.Length];

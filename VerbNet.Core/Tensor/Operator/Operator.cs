@@ -89,6 +89,18 @@ namespace VerbNet.Core
             }
         }
 
+        public static float[] Sqrt(float[] a)
+        {
+            if (Avx.IsSupported)
+            {
+                return SimdOperator.Sqrt(a);
+            }
+            else
+            {
+                return ScalarOperator.Sqrt(a);
+            }
+        }
+
         public static float[] Sin(float[] a)
         {
             return ScalarOperator.Sin(a);

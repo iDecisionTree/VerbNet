@@ -54,6 +54,15 @@
             return (Tensor.Zero, null);
         }
 
+        public static (Tensor, Tensor) SqrtGradFn(Tensor gradient, Tensor leftLeaf, Tensor rightLeaf)
+        {
+            Tensor sqrtX = TensorOperator.Sqrt(leftLeaf, false);
+            Tensor denominator = TensorOperator.Multiply(new Tensor([2f], [1], false), sqrtX, false);
+            Tensor grad = TensorOperator.Divide(gradient, denominator, false);
+
+            return (grad, null);
+        }
+
         public static (Tensor, Tensor) SinGradFn(Tensor gradient, Tensor leftLeaf, Tensor rightLeaf)
         {
             Tensor cosX = TensorOperator.Cos(leftLeaf, false);

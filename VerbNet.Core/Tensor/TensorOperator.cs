@@ -156,6 +156,24 @@
             return result;
         }
 
+        public static Tensor Sqrt(Tensor a, bool buildGraph = true)
+        {
+            if (a == null)
+                throw new ArgumentNullException(nameof(a));
+
+            bool requiresGrad = buildGraph && a.RequiresGrad;
+            Tensor result = new Tensor(Operator.Sqrt(a.Data), a.Shape, requiresGrad);
+
+            if (buildGraph)
+            {
+                result.GradFn = GradFunction.SqrtGradFn;
+                result.LeftLeaf = a;
+                result.LeftLeaf.Father = result;
+            }
+
+            return result;
+        }
+
         public static Tensor Sin(Tensor a, bool buildGraph = true)
         {
             if (a == null)
