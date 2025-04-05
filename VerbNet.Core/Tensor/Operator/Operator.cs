@@ -65,6 +65,30 @@ namespace VerbNet.Core
             }
         }
 
+        public static float[] Abs(float[] a)
+        {
+            if (Avx.IsSupported)
+            {
+                return SimdOperator.Abs(a);
+            }
+            else
+            {
+                return ScalarOperator.Abs(a);
+            }
+        }
+
+        public static float[] Sign(float[] a)
+        {
+            if (Avx.IsSupported)
+            {
+                return SimdOperator.Sign(a);
+            }
+            else
+            {
+                return ScalarOperator.Sign(a);
+            }
+        }
+
         public static float[] MatMul(float[] a, float[] b, int aRows, int aCols, int bCols)
         {
             if (Avx.IsSupported)

@@ -151,6 +151,72 @@ namespace VerbNet.Core
             return result;
         }
 
+        public static float[] Abs(float[] a)
+        {
+            float[] result = new float[a.Length];
+
+            const int chunkSize = 4096;
+            Parallel.ForEach(Partitioner.Create(0, result.Length, chunkSize), range =>
+            {
+                int start = range.Item1;
+                int end = range.Item2;
+
+                int simdEnd = start + ((end - start) / VECTOR_SIZE) * VECTOR_SIZE;
+                for (int i = start; i < simdEnd; i += VECTOR_SIZE)
+                {
+                    Vector<float> aVec = new Vector<float>(a, i);
+                    Vector<float> resultVec = Vector.Abs(aVec);
+                    resultVec.CopyTo(result, i);
+                }
+                start = simdEnd;
+
+                for (int i = start; i < end; i++)
+                {
+                    result[i] = Math.Abs(a[i]);
+                }
+            });
+
+            return result;
+        }
+
+        public static float[] Sign(float[] a)
+        {
+            float[] result = new float[a.Length];
+
+            const int chunkSize = 4096;
+            Vector<float> oneVector = new Vector<float>(1f);
+            Vector<float> minusOneVector = new Vector<float>(-1f);
+            Vector<float> zeroVector = Vector<float>.Zero;
+
+            Parallel.ForEach(Partitioner.Create(0, result.Length, chunkSize), range =>
+            {
+                int start = range.Item1;
+                int end = range.Item2;
+
+                int simdEnd = start + ((end - start) / VECTOR_SIZE) * VECTOR_SIZE;
+                for (int i = start; i < simdEnd; i += VECTOR_SIZE)
+                {
+                    Vector<float> inputVec = new Vector<float>(a, i);
+
+                    Vector<int> positiveMask = Vector.GreaterThan(inputVec, zeroVector);
+                    Vector<int> negativeMask = Vector.LessThan(inputVec, zeroVector);
+
+                    Vector<float> positivePart = Vector.ConditionalSelect(positiveMask, oneVector, zeroVector);
+                    Vector<float> negativePart = Vector.ConditionalSelect(negativeMask, minusOneVector, zeroVector);
+                    Vector<float> resultVec = positivePart + negativePart;
+
+                    resultVec.CopyTo(result, i);
+                }
+
+                for (int i = simdEnd; i < end; i++)
+                {
+                    result[i] = Math.Sign(a[i]);
+                }
+            });
+
+            return result;
+        }
+
         public static float[] MatMul(float[] a, float[] b, int aRows, int aCols, int bCols)
         {
             float[] result = new float[aRows * bCols];

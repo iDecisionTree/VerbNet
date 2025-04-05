@@ -57,6 +57,28 @@
             return result;
         }
 
+        public static float[] Abs(float[] a)
+        {
+            float[] result = new float[a.Length];
+            for (int i = 0; i < result.Length; i++)
+            {
+                result[i] = Math.Abs(a[i]);
+            }
+
+            return result;
+        }
+
+        public static float[] Sign(float[] a)
+        {
+            float[] result = new float[a.Length];
+            for (int i = 0; i < result.Length; i++)
+            {
+                result[i] = Math.Sign(a[i]);
+            }
+
+            return result;
+        }
+
         public static float[] MatMul(float[] a, float[] b, int aRows, int aCols, int bCols)
         {
             float[] result = new float[aRows * bCols];

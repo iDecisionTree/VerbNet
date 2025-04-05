@@ -8,14 +8,14 @@ namespace VerbNet.Demo
         static void Main(string[] args)
         {
             LayerList layers = new LayerList(
-                new Linear(16, 128, true, 0.01f),
-                new Linear(128, 128, true, 0.01f),
-                new Linear(128, 16, true, 0.01f)
+                new Linear(64, 1024, true, 0.01f),
+                new Linear(1024, 1024, true, 0.001f),
+                new Linear(1024, 1, true, 0.01f)
                 );
             MSELoss mse = new MSELoss(true);
 
-            Tensor input = Tensor.Random([4, 16]);
-            Tensor target = Tensor.Random([4, 16]);
+            Tensor input = Tensor.Random([16, 64]);
+            Tensor target = Tensor.Random([16, 1]);
 
             Stopwatch stopwatch = new Stopwatch();
 

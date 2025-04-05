@@ -120,6 +120,42 @@
             return result;
         }
 
+        public static Tensor Abs(Tensor a, bool buildGraph = true)
+        {
+            if (a == null)
+                throw new ArgumentNullException(nameof(a));
+
+            bool requiresGrad = buildGraph ? a.RequiresGrad : false;
+            Tensor result = new Tensor(Operator.Abs(a.Data), a.Shape, requiresGrad);
+
+            if (buildGraph)
+            {
+                result.GradFn = GradFunction.AbsGradFn;
+                result.LeftLeaf = a;
+                result.LeftLeaf.Father = result;
+            }
+
+            return result;
+        }
+
+        public static Tensor Sign(Tensor a, bool buildGraph = true)
+        {
+            if (a == null)
+                throw new ArgumentNullException(nameof(a));
+
+            bool requiresGrad = buildGraph ? a.RequiresGrad : false;
+            Tensor result = new Tensor(Operator.Sign(a.Data), a.Shape, requiresGrad);
+
+            if (buildGraph)
+            {
+                result.GradFn = GradFunction.SignGradFn;
+                result.LeftLeaf = a;
+                result.LeftLeaf.Father = result;
+            }
+
+            return result;
+        }
+
         public static Tensor MatMul(Tensor a, Tensor b, bool buildGraph = true)
         {
             if (a == null)

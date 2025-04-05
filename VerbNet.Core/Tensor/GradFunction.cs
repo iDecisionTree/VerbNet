@@ -27,6 +27,16 @@
             return (TensorOperator.Negate(gradient, false), null);
         }
 
+        public static (Tensor, Tensor) AbsGradFn(Tensor gradient, Tensor leftLeaf, Tensor rightLeaf)
+        {
+            return (TensorOperator.Multiply(gradient, TensorOperator.Sign(leftLeaf), false), null);
+        }
+
+        public static (Tensor, Tensor) SignGradFn(Tensor gradient, Tensor leftLeaf, Tensor rightLeaf)
+        {
+            return (Tensor.Zero, null);
+        }
+
         public static (Tensor, Tensor) MatMulGradFn(Tensor gradient, Tensor leftLeaf, Tensor rightLeaf)
         {
             Tensor bTransposed = TensorOperator.Transpose(rightLeaf, false);
@@ -40,9 +50,7 @@
 
         public static (Tensor, Tensor) TransposeGradFn(Tensor gradient, Tensor leftLeaf, Tensor rightLeaf)
         {
-            Tensor gradTransposed = TensorOperator.Transpose(gradient, false);
-
-            return (gradTransposed, null);
+            return (TensorOperator.Transpose(gradient, false), null);
         }
     }
 }
