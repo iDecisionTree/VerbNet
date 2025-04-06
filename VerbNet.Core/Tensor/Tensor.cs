@@ -1,6 +1,4 @@
-﻿using System.Runtime.InteropServices;
-
-namespace VerbNet.Core
+﻿namespace VerbNet.Core
 {
     public class Tensor
     {
@@ -153,9 +151,9 @@ namespace VerbNet.Core
         public static Tensor Tanh(Tensor a) => TensorOperator.Tanh(a, true);
         public static Tensor Transpose(Tensor a) => TensorOperator.Transpose(a, true);
         public static Tensor MatMul(Tensor a, Tensor b) => TensorOperator.MatMul(a, b, true);
-        
+
         public static Tensor Random(int[] shape, bool requiresGrad = false, float scale = 1f) => TensorOperator.Random(shape, requiresGrad, scale);
-        
+
         public void Backward(Tensor externalGradient = null)
         {
             if (!RequiresGrad)
@@ -188,7 +186,7 @@ namespace VerbNet.Core
             }
         }
 
-        public Tensor Copy()
+        public Tensor Clone()
         {
             float[] dataCopy = (float[])Data.Clone();
             int[] shapeCopy = (int[])Shape.Clone();
@@ -196,7 +194,7 @@ namespace VerbNet.Core
             Tensor gradientCopy = null;
             if (requiresGrad)
             {
-                gradientCopy = Gradient.Copy();
+                gradientCopy = Gradient.Clone();
             }
 
             Tensor copy = new Tensor()

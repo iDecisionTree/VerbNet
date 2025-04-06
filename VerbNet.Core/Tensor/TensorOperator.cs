@@ -562,7 +562,7 @@
                 throw new ArgumentException($"Cannot broadcast tensor from shape [{string.Join(", ", tensor.Shape)}] to [{string.Join(", ", targetShape)}]");
 
             if (tensor.Shape.SequenceEqual(targetShape))
-                return buildGraph ? tensor.Copy() : tensor;
+                return buildGraph ? tensor.Clone() : tensor;
 
             int targetRank = targetShape.Length;
             int tensorRank = tensor.Shape.Length;
