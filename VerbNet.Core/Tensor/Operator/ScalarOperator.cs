@@ -1,197 +1,145 @@
 ﻿namespace VerbNet.Core
 {
-    public static class ScalarOperator
+    public static unsafe class ScalarOperator
     {
-        public static float[] Add(float[] a, float[] b)
+        public static void Add(float* a, float* b, float* result, int length)
         {
-            float[] result = new float[a.Length];
-            for (int i = 0; i < result.Length; i++)
+            for (int i = 0; i < length; i++)
             {
                 result[i] = a[i] + b[i];
             }
-
-            return result;
         }
 
-        public static float[] Subtract(float[] a, float[] b)
+        public static void Subtract(float* a, float* b, float* result, int length)
         {
-            float[] result = new float[a.Length];
-            for (int i = 0; i < result.Length; i++)
+            for (int i = 0; i < length; i++)
             {
                 result[i] = a[i] - b[i];
             }
-
-            return result;
         }
 
-        public static float[] Multiply(float[] a, float[] b)
+        public static void Multiply(float* a, float* b, float* result, int length)
         {
-            float[] result = new float[a.Length];
-            for (int i = 0; i < result.Length; i++)
+            for (int i = 0; i < length; i++)
             {
                 result[i] = a[i] * b[i];
             }
-
-            return result;
         }
 
-        public static float[] Divide(float[] a, float[] b)
+        public static void Divide(float* a, float* b, float* result, int length)
         {
-            float[] result = new float[a.Length];
-            for (int i = 0; i < result.Length; i++)
+            for (int i = 0; i < length; i++)
             {
                 result[i] = a[i] / b[i];
             }
-
-            return result;
         }
 
-        public static float[] Negate(float[] a)
+        public static void Negate(float* a, float* result, int length)
         {
-            float[] result = new float[a.Length];
-            for (int i = 0; i < result.Length; i++)
+            for (int i = 0; i < length; i++)
             {
                 result[i] = -a[i];
             }
-
-            return result;
         }
 
-        public static float[] Abs(float[] a)
+        public static void Abs(float* a, float* result, int length)
         {
-            float[] result = new float[a.Length];
-            for (int i = 0; i < result.Length; i++)
+            for (int i = 0; i < length; i++)
             {
                 result[i] = Math.Abs(a[i]);
             }
-
-            return result;
         }
 
-        public static float[] Sign(float[] a)
+        public static void Sign(float* a, float* result, int length)
         {
-            float[] result = new float[a.Length];
-            for (int i = 0; i < result.Length; i++)
+            for (int i = 0; i < length; i++)
             {
                 result[i] = Math.Sign(a[i]);
             }
-
-            return result;
         }
 
-        public static float[] Sqrt(float[] a)
+        public static void Sqrt(float* a, float* result, int length)
         {
-            float[] result = new float[a.Length];
-            for (int i = 0; i < result.Length; i++)
+            for (int i = 0; i < length; i++)
             {
                 result[i] = MathF.Sqrt(a[i]);
             }
-
-            return result;
         }
 
-        public static float[] LogE(float[] a)
+        public static void LogE(float* a, float* result, int length)
         {
-            float[] result = new float[a.Length];
-            for (int i = 0; i < result.Length; i++)
+            for (int i = 0; i < length; i++)
             {
                 result[i] = MathF.Log(a[i]);
             }
-
-            return result;
         }
 
-        public static float[] Exp(float[] a)
+        public static void Exp(float* a, float* result, int length)
         {
-            float[] result = new float[a.Length];
-            for (int i = 0; i < result.Length; i++)
+            for (int i = 0; i < length; i++)
             {
                 result[i] = MathF.Exp(a[i]);
             }
-
-            return result;
         }
 
-        public static float[] Power(float[] a, float exponent)
+        public static void Power(float* a, float exponent, float* result, int length)
         {
-            float[] result = new float[a.Length];
-            for (int i = 0; i < result.Length; i++)
+            for (int i = 0; i < length; i++)
             {
                 result[i] = MathF.Pow(a[i], exponent);
             }
-
-            return result;
         }
 
-        public static float[] Sin(float[] a)
+        public static void Sin(float* a, float* result, int length)
         {
-            float[] result = new float[a.Length];
-            for (int i = 0; i < result.Length; i++)
+            for (int i = 0; i < length; i++)
             {
                 result[i] = MathF.Sin(a[i]);
             }
-
-            return result;
         }
 
-        public static float[] Cos(float[] a)
+        public static void Cos(float* a, float* result, int length)
         {
-            float[] result = new float[a.Length];
-            for (int i = 0; i < result.Length; i++)
+            for (int i = 0; i < length; i++)
             {
                 result[i] = MathF.Cos(a[i]);
             }
-
-            return result;
         }
 
-        public static float[] Tan(float[] a)
+        public static void Tan(float* a, float* result, int length)
         {
-            float[] result = new float[a.Length];
-            for (int i = 0; i < result.Length; i++)
+            for (int i = 0; i < length; i++)
             {
                 result[i] = MathF.Tan(a[i]);
             }
-
-            return result;
         }
 
-        public static float[] Sinh(float[] a)
+        public static void Sinh(float* a, float* result, int length)
         {
-            float[] result = new float[a.Length];
-            for (int i = 0; i < result.Length; i++)
+            for (int i = 0; i < length; i++)
             {
                 result[i] = MathF.Sinh(a[i]);
             }
-
-            return result;
         }
 
-        public static float[] Cosh(float[] a)
+        public static void Cosh(float* a, float* result, int length)
         {
-            float[] result = new float[a.Length];
-            for (int i = 0; i < result.Length; i++)
+            for (int i = 0; i < length; i++)
             {
                 result[i] = MathF.Cosh(a[i]);
             }
-
-            return result;
         }
 
-        public static float[] Tanh(float[] a)
+        public static void Tanh(float* a, float* result, int length)
         {
-            float[] result = new float[a.Length];
-            for (int i = 0; i < result.Length; i++)
+            for (int i = 0; i < length; i++)
             {
                 result[i] = MathF.Tanh(a[i]);
             }
-
-            return result;
         }
 
-        public static float[] MatMul(float[] a, float[] b, int aRows, int aCols, int bCols)
+        public static void MatMul(float* a, float* b, float* result, int aRows, int aCols, int bCols)
         {
-            float[] result = new float[aRows * bCols];
             Parallel.For(0, aRows, i =>
             {
                 for (int j = 0; j < bCols; j++)
@@ -204,13 +152,10 @@
                     result[i * bCols + j] = sum;
                 }
             });
-
-            return result;
         }
 
-        public static float[] Transpose(float[] a, int rows, int cols)
+        public static void Transpose(float* a, float* result, int rows, int cols)
         {
-            float[] result = new float[rows * cols];
             Parallel.For(0, rows, i =>
             {
                 for (int j = 0; j < cols; j++)
@@ -220,8 +165,6 @@
                     result[destIndex] = a[sourceIndex];
                 }
             });
-
-            return result;
         }
     }
 }

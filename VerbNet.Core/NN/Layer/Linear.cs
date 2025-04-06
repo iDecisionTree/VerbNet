@@ -59,10 +59,10 @@
 
         public override void ZeroGrad()
         {
-            Array.Fill(Weight.Gradient.Data, 0f);
+            Weight.Gradient.Data.Fill(0f);
             if (HasBias)
             {
-                Array.Fill(Bias.Gradient.Data, 0f);
+                Bias.Gradient.Data.Fill(0f);
             }
         }
     }

@@ -1,337 +1,306 @@
 ﻿using System.Collections.Concurrent;
 using System.Numerics;
+using System.Runtime.Intrinsics.X86;
+using System.Runtime.Intrinsics;
 
 namespace VerbNet.Core
 {
-    public class SimdOperator
+    public static unsafe class SimdOperator
     {
-        public const int VECTOR_SIZE = 8;
+        public const int AVX_VECTOR_SIZE = 8;
 
-        public static float[] Add(float[] a, float[] b)
+        private static int _maxDegreeOfParallelism => Environment.ProcessorCount;
+        private static ParallelOptions _parallelOptions = new ParallelOptions
         {
-            float[] result = new float[a.Length];
+            MaxDegreeOfParallelism = _maxDegreeOfParallelism
+        };
 
+        public static void Add(float* a, float* b, float* result, int length)
+        {
             const int chunkSize = 4096;
-            Parallel.ForEach(Partitioner.Create(0, result.Length, chunkSize), range =>
+
+            Parallel.For(0, (length + chunkSize - 1) / chunkSize, _parallelOptions, chunkIndex =>
             {
-                int start = range.Item1;
-                int end = range.Item2;
+                int start = chunkIndex * chunkSize;
+                int end = Math.Min(start + chunkSize, length);
 
-                int simdEnd = start + ((end - start) / VECTOR_SIZE) * VECTOR_SIZE;
-                for (int i = start; i < simdEnd; i += VECTOR_SIZE)
+                int i = start;
+                int vectorizableLength = end - start;
+                int vectorizedEnd = start + (vectorizableLength / AVX_VECTOR_SIZE) * AVX_VECTOR_SIZE;
+
+                for (; i < vectorizedEnd; i += AVX_VECTOR_SIZE)
                 {
-                    Vector<float> aVec = new Vector<float>(a, i);
-                    Vector<float> bVec = new Vector<float>(b, i);
-                    Vector<float> resultVec = Vector.Add(aVec, bVec);
-                    resultVec.CopyTo(result, i);
+                    Vector128<float> aVec = Avx.LoadAlignedVector128(a + i);
+                    Vector128<float> bVec = Avx.LoadAlignedVector128(b + i);
+                    Vector128<float> resultVec = Avx.Add(aVec, bVec);
+                    Avx.StoreAligned(result + i, resultVec);
                 }
-                start = simdEnd;
-
-                for (int i = start; i < end; i++)
+                for (; i < end; i++)
                 {
                     result[i] = a[i] + b[i];
                 }
             });
-
-            return result;
         }
 
-        public static float[] Subtract(float[] a, float[] b)
+        public static void Subtract(float* a, float* b, float* result, int length)
         {
-            float[] result = new float[a.Length];
-
             const int chunkSize = 4096;
-            Parallel.ForEach(Partitioner.Create(0, result.Length, chunkSize), range =>
+
+            Parallel.For(0, (length + chunkSize - 1) / chunkSize, _parallelOptions, chunkIndex =>
             {
-                int start = range.Item1;
-                int end = range.Item2;
+                int start = chunkIndex * chunkSize;
+                int end = Math.Min(start + chunkSize, length);
 
-                int simdEnd = start + ((end - start) / VECTOR_SIZE) * VECTOR_SIZE;
-                for (int i = start; i < simdEnd; i += VECTOR_SIZE)
+                int i = start;
+                int vectorizableLength = end - start;
+                int vectorizedEnd = start + (vectorizableLength / AVX_VECTOR_SIZE) * AVX_VECTOR_SIZE;
+
+                for (; i < vectorizedEnd; i += AVX_VECTOR_SIZE)
                 {
-                    Vector<float> aVec = new Vector<float>(a, i);
-                    Vector<float> bVec = new Vector<float>(b, i);
-                    Vector<float> resultVec = Vector.Subtract(aVec, bVec);
-                    resultVec.CopyTo(result, i);
+                    Vector128<float> aVec = Avx.LoadAlignedVector128(a + i);
+                    Vector128<float> bVec = Avx.LoadAlignedVector128(b + i);
+                    Vector128<float> resultVec = Avx.Subtract(aVec, bVec);
+                    Avx.StoreAligned(result + i, resultVec);
                 }
-                start = simdEnd;
-
-                for (int i = start; i < end; i++)
+                for (; i < end; i++)
                 {
                     result[i] = a[i] - b[i];
                 }
             });
-
-            return result;
         }
 
-        public static float[] Multiply(float[] a, float[] b)
+        public static void Multiply(float* a, float* b, float* result, int length)
         {
-            float[] result = new float[a.Length];
-
             const int chunkSize = 4096;
-            Parallel.ForEach(Partitioner.Create(0, result.Length, chunkSize), range =>
+
+            Parallel.For(0, (length + chunkSize - 1) / chunkSize, _parallelOptions, chunkIndex =>
             {
-                int start = range.Item1;
-                int end = range.Item2;
+                int start = chunkIndex * chunkSize;
+                int end = Math.Min(start + chunkSize, length);
 
-                int simdEnd = start + ((end - start) / VECTOR_SIZE) * VECTOR_SIZE;
-                for (int i = start; i < simdEnd; i += VECTOR_SIZE)
+                int i = start;
+                int vectorizableLength = end - start;
+                int vectorizedEnd = start + (vectorizableLength / AVX_VECTOR_SIZE) * AVX_VECTOR_SIZE;
+
+                for (; i < vectorizedEnd; i += AVX_VECTOR_SIZE)
                 {
-                    Vector<float> aVec = new Vector<float>(a, i);
-                    Vector<float> bVec = new Vector<float>(b, i);
-                    Vector<float> resultVec = Vector.Multiply(aVec, bVec);
-                    resultVec.CopyTo(result, i);
+                    Vector128<float> aVec = Avx.LoadAlignedVector128(a + i);
+                    Vector128<float> bVec = Avx.LoadAlignedVector128(b + i);
+                    Vector128<float> resultVec = Avx.Multiply(aVec, bVec);
+                    Avx.StoreAligned(result + i, resultVec);
                 }
-                start = simdEnd;
-
-                for (int i = start; i < end; i++)
+                for (; i < end; i++)
                 {
                     result[i] = a[i] * b[i];
                 }
             });
-
-            return result;
         }
 
-        public static float[] Divide(float[] a, float[] b)
+        public static void Divide(float* a, float* b, float* result, int length)
         {
-            float[] result = new float[a.Length];
-
             const int chunkSize = 4096;
-            Parallel.ForEach(Partitioner.Create(0, result.Length, chunkSize), range =>
+
+            Parallel.For(0, (length + chunkSize - 1) / chunkSize, _parallelOptions, chunkIndex =>
             {
-                int start = range.Item1;
-                int end = range.Item2;
+                int start = chunkIndex * chunkSize;
+                int end = Math.Min(start + chunkSize, length);
 
-                int simdEnd = start + ((end - start) / VECTOR_SIZE) * VECTOR_SIZE;
-                for (int i = start; i < simdEnd; i += VECTOR_SIZE)
+                int i = start;
+                int vectorizableLength = end - start;
+                int vectorizedEnd = start + (vectorizableLength / AVX_VECTOR_SIZE) * AVX_VECTOR_SIZE;
+
+                for (; i < vectorizedEnd; i += AVX_VECTOR_SIZE)
                 {
-                    Vector<float> aVec = new Vector<float>(a, i);
-                    Vector<float> bVec = new Vector<float>(b, i);
-                    Vector<float> resultVec = Vector.Divide(aVec, bVec);
-                    resultVec.CopyTo(result, i);
+                    Vector128<float> aVec = Avx.LoadAlignedVector128(a + i);
+                    Vector128<float> bVec = Avx.LoadAlignedVector128(b + i);
+                    Vector128<float> resultVec = Avx.Divide(aVec, bVec);
+                    Avx.StoreAligned(result + i, resultVec);
                 }
-                start = simdEnd;
-
-                for (int i = start; i < end; i++)
+                for (; i < end; i++)
                 {
                     result[i] = a[i] / b[i];
                 }
             });
-
-            return result;
         }
 
-        public static float[] Negate(float[] a)
+        public static void Negate(float* a, float* result, int length)
         {
-            float[] result = new float[a.Length];
-
             const int chunkSize = 4096;
-            Parallel.ForEach(Partitioner.Create(0, result.Length, chunkSize), range =>
+            Vector128<float> zeroVec = Vector128<float>.Zero;
+
+            Parallel.For(0, (length + chunkSize - 1) / chunkSize, _parallelOptions, chunkIndex =>
             {
-                int start = range.Item1;
-                int end = range.Item2;
+                int start = chunkIndex * chunkSize;
+                int end = Math.Min(start + chunkSize, length);
 
-                int simdEnd = start + ((end - start) / VECTOR_SIZE) * VECTOR_SIZE;
-                for (int i = start; i < simdEnd; i += VECTOR_SIZE)
+                int i = start;
+                int vectorizableLength = end - start;
+                int vectorizedEnd = start + (vectorizableLength / AVX_VECTOR_SIZE) * AVX_VECTOR_SIZE;
+
+                for (; i < vectorizedEnd; i += AVX_VECTOR_SIZE)
                 {
-                    Vector<float> aVec = new Vector<float>(a, i);
-                    Vector<float> resultVec = Vector.Negate(aVec);
-                    resultVec.CopyTo(result, i);
+                    Vector128<float> aVec = Avx.LoadAlignedVector128(a + i);
+                    Vector128<float> resultVec = Avx.Subtract(zeroVec, aVec);
+                    Avx.StoreAligned(result + i, resultVec);
                 }
-                start = simdEnd;
-
-                for (int i = start; i < end; i++)
+                for (; i < end; i++)
                 {
                     result[i] = -a[i];
                 }
             });
-
-            return result;
         }
 
-        public static float[] Abs(float[] a)
+        public static void Abs(float* a, float* result, int length)
         {
-            float[] result = new float[a.Length];
-
             const int chunkSize = 4096;
-            Parallel.ForEach(Partitioner.Create(0, result.Length, chunkSize), range =>
+            Vector128<float> zeroVec = Vector128<float>.Zero;
+
+            Parallel.For(0, (length + chunkSize - 1) / chunkSize, _parallelOptions, chunkIndex =>
             {
-                int start = range.Item1;
-                int end = range.Item2;
+                int start = chunkIndex * chunkSize;
+                int end = Math.Min(start + chunkSize, length);
 
-                int simdEnd = start + ((end - start) / VECTOR_SIZE) * VECTOR_SIZE;
-                for (int i = start; i < simdEnd; i += VECTOR_SIZE)
+                int i = start;
+                int vectorizableLength = end - start;
+                int vectorizedEnd = start + (vectorizableLength / AVX_VECTOR_SIZE) * AVX_VECTOR_SIZE;
+
+                for (; i < vectorizedEnd; i += AVX_VECTOR_SIZE)
                 {
-                    Vector<float> aVec = new Vector<float>(a, i);
-                    Vector<float> resultVec = Vector.Abs(aVec);
-                    resultVec.CopyTo(result, i);
+                    Vector128<float> aVec = Avx.LoadAlignedVector128(a + i);
+                    Vector128<float> mask = Avx.CompareLessThan(aVec, zeroVec);
+                    Vector128<float> resultVec = Avx.Xor(aVec, mask);
+                    resultVec = Avx.Subtract(resultVec, mask);
+                    Avx.StoreAligned(result + i, resultVec);
                 }
-                start = simdEnd;
-
-                for (int i = start; i < end; i++)
+                for (; i < end; i++)
                 {
-                    result[i] = Math.Abs(a[i]);
+                    result[i] = MathF.Abs(a[i]);
                 }
             });
-
-            return result;
         }
 
-        public static float[] Sign(float[] a)
+        public static void Sign(float* a, float* result, int length)
         {
-            float[] result = new float[a.Length];
-
             const int chunkSize = 4096;
-            Vector<float> oneVector = new Vector<float>(1f);
-            Vector<float> minusOneVector = new Vector<float>(-1f);
-            Vector<float> zeroVector = Vector<float>.Zero;
+            Vector128<float> zeroVec = Vector128<float>.Zero;
+            Vector128<float> oneVec = Vector128.Create(1.0f);
+            Vector128<float> minusOneVec = Vector128.Create(-1.0f);
 
-            Parallel.ForEach(Partitioner.Create(0, result.Length, chunkSize), range =>
+            Parallel.For(0, (length + chunkSize - 1) / chunkSize, _parallelOptions, chunkIndex =>
             {
-                int start = range.Item1;
-                int end = range.Item2;
+                int start = chunkIndex * chunkSize;
+                int end = Math.Min(start + chunkSize, length);
 
-                int simdEnd = start + ((end - start) / VECTOR_SIZE) * VECTOR_SIZE;
-                for (int i = start; i < simdEnd; i += VECTOR_SIZE)
+                int i = start;
+                int vectorizableLength = end - start;
+                int vectorizedEnd = start + (vectorizableLength / AVX_VECTOR_SIZE) * AVX_VECTOR_SIZE;
+
+                for (; i < vectorizedEnd; i += AVX_VECTOR_SIZE)
                 {
-                    Vector<float> inputVec = new Vector<float>(a, i);
+                    Vector128<float> aVec = Avx.LoadAlignedVector128(a + i);
+                    Vector128<float> positiveMask = Avx.CompareGreaterThan(aVec, zeroVec);
+                    Vector128<float> negativeMask = Avx.CompareLessThan(aVec, zeroVec);
 
-                    Vector<int> positiveMask = Vector.GreaterThan(inputVec, zeroVector);
-                    Vector<int> negativeMask = Vector.LessThan(inputVec, zeroVector);
+                    Vector128<float> positivePart = Avx.And(positiveMask, oneVec);
+                    Vector128<float> negativePart = Avx.And(negativeMask, minusOneVec);
+                    Vector128<float> resultVec = Avx.Add(positivePart, negativePart);
 
-                    Vector<float> positivePart = Vector.ConditionalSelect(positiveMask, oneVector, zeroVector);
-                    Vector<float> negativePart = Vector.ConditionalSelect(negativeMask, minusOneVector, zeroVector);
-                    Vector<float> resultVec = positivePart + negativePart;
-
-                    resultVec.CopyTo(result, i);
+                    Avx.StoreAligned(result + i, resultVec);
                 }
-
-                for (int i = simdEnd; i < end; i++)
+                for (; i < end; i++)
                 {
-                    result[i] = Math.Sign(a[i]);
+                    result[i] = MathF.Sign(a[i]);
                 }
             });
-
-            return result;
         }
 
-        public static float[] Sqrt(float[] a)
+        public static void Sqrt(float* a, float* result, int length)
         {
-            float[] result = new float[a.Length];
-
             const int chunkSize = 4096;
-            Parallel.ForEach(Partitioner.Create(0, result.Length, chunkSize), range =>
+
+            Parallel.For(0, (length + chunkSize - 1) / chunkSize, _parallelOptions, chunkIndex =>
             {
-                int start = range.Item1;
-                int end = range.Item2;
+                int start = chunkIndex * chunkSize;
+                int end = Math.Min(start + chunkSize, length);
 
-                int simdEnd = start + ((end - start) / VECTOR_SIZE) * VECTOR_SIZE;
-                for (int i = start; i < simdEnd; i += VECTOR_SIZE)
+                int i = start;
+                int vectorizableLength = end - start;
+                int vectorizedEnd = start + (vectorizableLength / AVX_VECTOR_SIZE) * AVX_VECTOR_SIZE;
+
+                for (; i < vectorizedEnd; i += AVX_VECTOR_SIZE)
                 {
-                    Vector<float> aVec = new Vector<float>(a, i);
-                    Vector<float> resultVec = Vector.SquareRoot(aVec);
-                    resultVec.CopyTo(result, i);
+                    Vector128<float> aVec = Avx.LoadAlignedVector128(a + i);
+                    Vector128<float> resultVec = Avx.Sqrt(aVec);
+                    Avx.StoreAligned(result + i, resultVec);
                 }
-                start = simdEnd;
-
-                for (int i = start; i < end; i++)
+                for (; i < end; i++)
                 {
                     result[i] = MathF.Sqrt(a[i]);
                 }
             });
-
-            return result;
         }
 
-        public static float[] LogE(float[] a)
+        public static void LogE(float* a, float* result, int length)
         {
-            float[] result = new float[a.Length];
-
             const int chunkSize = 4096;
-            Parallel.ForEach(Partitioner.Create(0, result.Length, chunkSize), range =>
-            {
-                int start = range.Item1;
-                int end = range.Item2;
 
-                int simdEnd = start + ((end - start) / VECTOR_SIZE) * VECTOR_SIZE;
-                for (int i = start; i < simdEnd; i += VECTOR_SIZE)
-                {
-                    Vector<float> aVec = new Vector<float>(a, i);
-                    Vector<float> resultVec = Vector.Log(aVec);
-                    resultVec.CopyTo(result, i);
-                }
-                start = simdEnd;
+            Parallel.For(0, (length + chunkSize - 1) / chunkSize, _parallelOptions, chunkIndex =>
+            {
+                int start = chunkIndex * chunkSize;
+                int end = Math.Min(start + chunkSize, length);
 
                 for (int i = start; i < end; i++)
                 {
                     result[i] = MathF.Log(a[i]);
                 }
             });
-
-            return result;
         }
 
-        public static float[] Exp(float[] a)
+        public static void Exp(float* a, float* result, int length)
         {
-            float[] result = new float[a.Length];
-
             const int chunkSize = 4096;
-            Parallel.ForEach(Partitioner.Create(0, result.Length, chunkSize), range =>
-            {
-                int start = range.Item1;
-                int end = range.Item2;
 
-                int simdEnd = start + ((end - start) / VECTOR_SIZE) * VECTOR_SIZE;
-                for (int i = start; i < simdEnd; i += VECTOR_SIZE)
-                {
-                    Vector<float> aVec = new Vector<float>(a, i);
-                    Vector<float> resultVec = Vector.Exp(aVec);
-                    resultVec.CopyTo(result, i);
-                }
-                start = simdEnd;
+            Parallel.For(0, (length + chunkSize - 1) / chunkSize, _parallelOptions, chunkIndex =>
+            {
+                int start = chunkIndex * chunkSize;
+                int end = Math.Min(start + chunkSize, length);
 
                 for (int i = start; i < end; i++)
                 {
                     result[i] = MathF.Exp(a[i]);
                 }
             });
-
-            return result;
         }
 
-        public static float[] MatMul(float[] a, float[] b, int aRows, int aCols, int bCols)
+        public static void MatMul(float* a, float* bT, float* result, int aRows, int aCols, int bCols)
         {
-            float[] result = new float[aRows * bCols];
-            float[] bTransposed = Transpose(b, aCols, bCols);
-
             Parallel.For(0, aRows, i =>
             {
                 for (int j = 0; j < bCols; j++)
                 {
                     float sum = 0;
                     int k = 0;
-                    for (; k <= aCols - Vector<float>.Count; k += Vector<float>.Count)
+                    for (; k <= aCols - AVX_VECTOR_SIZE; k += AVX_VECTOR_SIZE)
                     {
-                        var aVec = new Vector<float>(a, i * aCols + k);
-                        var bVec = new Vector<float>(bTransposed, j * aCols + k);
-                        sum += Vector.Dot(aVec, bVec);
+                        Vector128<float> aVec = Avx.LoadAlignedVector128(a + i * aCols + k);
+                        Vector128<float> bVec = Avx.LoadAlignedVector128(bT + j * aCols + k);
+                        Vector128<float> mul = Avx.Multiply(aVec, bVec);
+
+                        Vector128<float> sum128 = Sse3.HorizontalAdd(mul, mul);
+                        sum128 = Sse3.HorizontalAdd(sum128, sum128);
+                        sum += sum128.ToScalar();
                     }
                     for (; k < aCols; k++)
                     {
-                        sum += a[i * aCols + k] * bTransposed[j * aCols + k];
+                        sum += a[i * aCols + k] * bT[j * aCols + k];
                     }
                     result[i * bCols + j] = sum;
                 }
             });
-
-            return result;
         }
 
-        public static float[] Transpose(float[] a, int rows, int cols)
+        public static void Transpose(float* a, float* result, int rows, int cols)
         {
-            float[] result = new float[rows * cols];
             Parallel.For(0, rows, i =>
             {
                 for (int j = 0; j < cols; j++)
@@ -341,8 +310,6 @@ namespace VerbNet.Core
                     result[destIndex] = a[sourceIndex];
                 }
             });
-
-            return result;
         }
     }
 }

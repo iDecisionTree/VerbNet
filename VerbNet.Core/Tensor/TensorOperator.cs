@@ -352,10 +352,11 @@
 
             int aRows = a.Shape[0];
             int aCols = a.Shape[1];
+            int bRows = b.Shape[0];
             int bCols = b.Shape[1];
 
             bool requiresGrad = buildGraph && (a.RequiresGrad || b.RequiresGrad);
-            Tensor result = new Tensor(Operator.MatMul(a.Data, b.Data, aRows, aCols, bCols), [aRows, bCols], requiresGrad);
+            Tensor result = new Tensor(Operator.MatMul(a.Data, b.Data, aRows, aCols, bRows, bCols), [aRows, bCols], requiresGrad);
 
             if (buildGraph)
             {
@@ -432,7 +433,8 @@
                 inner *= a.Shape[i];
             }
 
-            float[] newData = new float[outer * dim * repeat * inner];
+            AlignedArray<float> newData = new AlignedArray<float>(outer * dim * repeat * inner, a.Data.Alignment);
+
             Parallel.For(0, outer, o =>
             {
                 int sourceOuterOffset = o * dim * inner;
@@ -443,13 +445,19 @@
                     int sourceStart = sourceOuterOffset + d * inner;
                     int targetStartBase = targetOuterOffset + d * repeat * inner;
 
-                    Array.Copy(a.Data, sourceStart, newData, targetStartBase, inner);
+                    for (int i = 0; i < inner; i++)
+                    {
+                        newData[targetStartBase + i] = a.Data[sourceStart + i];
+                    }
 
                     int copied = 1;
                     while (copied < repeat)
                     {
                         int toCopy = Math.Min(copied, repeat - copied);
-                        Array.Copy(newData, targetStartBase, newData, targetStartBase + copied * inner, toCopy * inner);
+                        for (int i = 0; i < toCopy * inner; i++)
+                        {
+                            newData[targetStartBase + copied * inner + i] = newData[targetStartBase + i];
+                        }
                         copied += toCopy;
                     }
                 }
@@ -589,7 +597,7 @@
             }
 
             int totalElements = targetShape.Aggregate(1, (a, b) => a * b);
-            float[] broadcastData = new float[totalElements];
+            AlignedArray<float> broadcastData = new AlignedArray<float>(totalElements, tensor.Data.Alignment);
 
             Parallel.For(0, totalElements, linearIndex =>
             {

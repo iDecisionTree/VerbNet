@@ -2,178 +2,219 @@
 
 namespace VerbNet.Core
 {
-    public static class Operator
+    public static unsafe class Operator
     {
-        public static float[] Add(float[] a, float[] b)
+        public static AlignedArray<float> Add(AlignedArray<float> a, AlignedArray<float> b)
         {
+            AlignedArray<float> result = new AlignedArray<float>(a.Length, a.Alignment);
             if (Avx.IsSupported)
             {
-                return SimdOperator.Add(a, b);
+                SimdOperator.Add(a.Ptr, b.Ptr, result.Ptr, a.Length);
             }
             else
             {
-                return ScalarOperator.Add(a, b);
+                ScalarOperator.Add(a.Ptr, b.Ptr, result.Ptr, a.Length);
             }
+            return result;
         }
 
-        public static float[] Subtract(float[] a, float[] b)
+        public static AlignedArray<float> Subtract(AlignedArray<float> a, AlignedArray<float> b)
         {
+            AlignedArray<float> result = new AlignedArray<float>(a.Length, a.Alignment);
             if (Avx.IsSupported)
             {
-                return SimdOperator.Subtract(a, b);
+                SimdOperator.Subtract(a.Ptr, b.Ptr, result.Ptr, a.Length);
             }
             else
             {
-                return ScalarOperator.Subtract(a, b);
+                ScalarOperator.Subtract(a.Ptr, b.Ptr, result.Ptr, a.Length);
             }
+            return result;
         }
 
-        public static float[] Multiply(float[] a, float[] b)
+        public static AlignedArray<float> Multiply(AlignedArray<float> a, AlignedArray<float> b)
         {
+            AlignedArray<float> result = new AlignedArray<float>(a.Length, a.Alignment);
             if (Avx.IsSupported)
             {
-                return SimdOperator.Multiply(a, b);
+                SimdOperator.Multiply(a.Ptr, b.Ptr, result.Ptr, a.Length);
             }
             else
             {
-                return ScalarOperator.Multiply(a, b);
+                ScalarOperator.Multiply(a.Ptr, b.Ptr, result.Ptr, a.Length);
             }
+            return result;
         }
 
-        public static float[] Divide(float[] a, float[] b)
+        public static AlignedArray<float> Divide(AlignedArray<float> a, AlignedArray<float> b)
         {
+            AlignedArray<float> result = new AlignedArray<float>(a.Length, a.Alignment);
             if (Avx.IsSupported)
             {
-                return SimdOperator.Divide(a, b);
+                SimdOperator.Divide(a.Ptr, b.Ptr, result.Ptr, a.Length);
             }
             else
             {
-                return ScalarOperator.Divide(a, b);
+                ScalarOperator.Divide(a.Ptr, b.Ptr, result.Ptr, a.Length);
             }
+            return result;
         }
 
-        public static float[] Negate(float[] a)
+        public static AlignedArray<float> Negate(AlignedArray<float> a)
         {
+            AlignedArray<float> result = new AlignedArray<float>(a.Length, a.Alignment);
             if (Avx.IsSupported)
             {
-                return SimdOperator.Negate(a);
+                SimdOperator.Negate(a.Ptr, result.Ptr, a.Length);
             }
             else
             {
-                return ScalarOperator.Negate(a);
+                ScalarOperator.Negate(a.Ptr, result.Ptr, a.Length);
             }
+            return result;
         }
 
-        public static float[] Abs(float[] a)
+        public static AlignedArray<float> Abs(AlignedArray<float> a)
         {
+            AlignedArray<float> result = new AlignedArray<float>(a.Length, a.Alignment);
             if (Avx.IsSupported)
             {
-                return SimdOperator.Abs(a);
+                SimdOperator.Abs(a.Ptr, result.Ptr, a.Length);
             }
             else
             {
-                return ScalarOperator.Abs(a);
+                ScalarOperator.Abs(a.Ptr, result.Ptr, a.Length);
             }
+            return result;
         }
 
-        public static float[] Sign(float[] a)
+        public static AlignedArray<float> Sign(AlignedArray<float> a)
         {
+            AlignedArray<float> result = new AlignedArray<float>(a.Length, a.Alignment);
             if (Avx.IsSupported)
             {
-                return SimdOperator.Sign(a);
+                SimdOperator.Sign(a.Ptr, result.Ptr, a.Length);
             }
             else
             {
-                return ScalarOperator.Sign(a);
+                ScalarOperator.Sign(a.Ptr, result.Ptr, a.Length);
             }
+            return result;
         }
 
-        public static float[] Sqrt(float[] a)
+        public static AlignedArray<float> Sqrt(AlignedArray<float> a)
         {
+            AlignedArray<float> result = new AlignedArray<float>(a.Length, a.Alignment);
             if (Avx.IsSupported)
             {
-                return SimdOperator.Sqrt(a);
+                SimdOperator.Sqrt(a.Ptr, result.Ptr, a.Length);
             }
             else
             {
-                return ScalarOperator.Sqrt(a);
+                ScalarOperator.Sqrt(a.Ptr, result.Ptr, a.Length);
             }
+            return result;
         }
 
-        public static float[] LogE(float[] a)
+        public static AlignedArray<float> LogE(AlignedArray<float> a)
         {
+            AlignedArray<float> result = new AlignedArray<float>(a.Length, a.Alignment);
             if (Avx.IsSupported)
             {
-                return SimdOperator.LogE(a);
+                SimdOperator.LogE(a.Ptr, result.Ptr, a.Length);
             }
             else
             {
-                return ScalarOperator.LogE(a);
+                ScalarOperator.LogE(a.Ptr, result.Ptr, a.Length);
             }
+            return result;
         }
 
-        public static float[] Exp(float[] a)
+        public static AlignedArray<float> Exp(AlignedArray<float> a)
         {
+            AlignedArray<float> result = new AlignedArray<float>(a.Length, a.Alignment);
             if (Avx.IsSupported)
             {
-                return SimdOperator.Exp(a);
+                SimdOperator.Exp(a.Ptr, result.Ptr, a.Length);
             }
             else
             {
-                return ScalarOperator.Exp(a);
+                ScalarOperator.Exp(a.Ptr, result.Ptr, a.Length);
             }
+            return result;
         }
 
-        public static float[] Power(float[] a, float exponent)
+        public static AlignedArray<float> Power(AlignedArray<float> a, float exponent)
         {
-            return ScalarOperator.Power(a, exponent);
+            AlignedArray<float> result = new AlignedArray<float>(a.Length, a.Alignment);
+            ScalarOperator.Power(a.Ptr, exponent, result.Ptr, a.Length);
+            return result;
         }
 
-        public static float[] Sin(float[] a)
+        public static AlignedArray<float> Sin(AlignedArray<float> a)
         {
-            return ScalarOperator.Sin(a);
+            AlignedArray<float> result = new AlignedArray<float>(a.Length, a.Alignment);
+            ScalarOperator.Sin(a.Ptr, result.Ptr, a.Length);
+            return result;
         }
 
-        public static float[] Cos(float[] a)
+        public static AlignedArray<float> Cos(AlignedArray<float> a)
         {
-            return ScalarOperator.Cos(a);
+            AlignedArray<float> result = new AlignedArray<float>(a.Length, a.Alignment);
+            ScalarOperator.Cos(a.Ptr, result.Ptr, a.Length);
+            return result;
         }
 
-        public static float[] Tan(float[] a)
+        public static AlignedArray<float> Tan(AlignedArray<float> a)
         {
-            return ScalarOperator.Tan(a);
+            AlignedArray<float> result = new AlignedArray<float>(a.Length, a.Alignment);
+            ScalarOperator.Tan(a.Ptr, result.Ptr, a.Length);
+            return result;
         }
 
-        public static float[] Sinh(float[] a)
+        public static AlignedArray<float> Sinh(AlignedArray<float> a)
         {
-            return ScalarOperator.Sinh(a);
+            AlignedArray<float> result = new AlignedArray<float>(a.Length, a.Alignment);
+            ScalarOperator.Sinh(a.Ptr, result.Ptr, a.Length);
+            return result;
         }
 
-        public static float[] Cosh(float[] a)
+        public static AlignedArray<float> Cosh(AlignedArray<float> a)
         {
-            return ScalarOperator.Cosh(a);
+            AlignedArray<float> result = new AlignedArray<float>(a.Length, a.Alignment);
+            ScalarOperator.Cosh(a.Ptr, result.Ptr, a.Length);
+            return result;
         }
 
-        public static float[] Tanh(float[] a)
+        public static AlignedArray<float> Tanh(AlignedArray<float> a)
         {
-            return ScalarOperator.Tanh(a);
+            AlignedArray<float> result = new AlignedArray<float>(a.Length, a.Alignment);
+            ScalarOperator.Tanh(a.Ptr, result.Ptr, a.Length);
+            return result;
         }
 
-        public static float[] MatMul(float[] a, float[] b, int aRows, int aCols, int bCols)
+        public static AlignedArray<float> MatMul(AlignedArray<float> a, AlignedArray<float> b, int aRows, int aCols, int bRows, int bCols)
         {
+            AlignedArray<float> result = new AlignedArray<float>(aRows * bCols, a.Alignment);
             if (Avx.IsSupported)
             {
-                return SimdOperator.MatMul(a, b, aRows, aCols, bCols);
+                AlignedArray<float> bTransposed = Transpose(b, bRows, bCols);
+                SimdOperator.MatMul(a.Ptr, bTransposed.Ptr, result.Ptr, aRows, aCols, bCols);
+                bTransposed.Dispose();
             }
             else
             {
-                return ScalarOperator.MatMul(a, b, aRows, aCols, bCols);
+                ScalarOperator.MatMul(a.Ptr, b.Ptr, result.Ptr, aRows, aCols, bCols);
             }
+            return result;
         }
 
-        public static float[] Transpose(float[] a, int rows, int cols)
+        public static AlignedArray<float> Transpose(AlignedArray<float> a, int rows, int cols)
         {
-            return ScalarOperator.Transpose(a, rows, cols);
+            AlignedArray<float> result = new AlignedArray<float>(a.Length, a.Alignment);
+            ScalarOperator.Transpose(a.Ptr, result.Ptr, rows, cols);
+
+            return result;
         }
     }
 }

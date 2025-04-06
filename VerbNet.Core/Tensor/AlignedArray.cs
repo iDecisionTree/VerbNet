@@ -15,20 +15,6 @@ namespace VerbNet.Core
         private readonly int _alignment;
         private bool _disposed;
 
-        public ref T this[int index]
-        {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get
-            {
-                if (_disposed)
-                    throw new ObjectDisposedException(nameof(AlignedArray<T>));
-                if ((uint)index >= (uint)_length)
-                    throw new IndexOutOfRangeException($"Index {index} is out of range for length {_length}.");
-
-                return ref _ptr[index];
-            }
-        }
-
         public AlignedArray(int length, int alignment = 32)
         {
             if (length <= 0)
@@ -44,6 +30,25 @@ namespace VerbNet.Core
             if (_ptr == null)
                 throw new OutOfMemoryException("Failed to allocate aligned memory");
             Clear();
+        }
+
+        public AlignedArray(T[] array, int alignment = 32) : this(array.Length, alignment)
+        {
+            array.AsSpan().CopyTo(AsSpan());
+        }
+
+        public ref T this[int index]
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get
+            {
+                if (_disposed)
+                    throw new ObjectDisposedException(nameof(AlignedArray<T>));
+                if ((uint)index >= (uint)_length)
+                    throw new IndexOutOfRangeException($"Index {index} is out of range for length {_length}.");
+
+                return ref _ptr[index];
+            }
         }
 
         public Span<T> AsSpan()

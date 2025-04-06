@@ -2,7 +2,8 @@
 {
     public class Tensor
     {
-        public float[] Data;
+        public AlignedArray<float> Data;
+        public int Length => Data.Length;
         public int[] Shape;
         public int Rank => Shape.Length;
 
@@ -29,7 +30,7 @@
                     throw new ArgumentException("All dimensions must be positive integers");
             }
 
-            Data = new float[shape.Aggregate((a, b) => a * b)];
+            Data = new AlignedArray<float>(shape.Aggregate(1, (a, b) => a * b), 32);
             Shape = (int[])shape.Clone();
 
             RequiresGrad = requiresGrad;
@@ -62,7 +63,40 @@
             if (data.Length != totalElements)
                 throw new ArgumentException($"Data length ({data.Length}) does not match shape product ({totalElements})");
 
-            Data = (float[])data.Clone();
+            Data = new AlignedArray<float>(data, 32);
+            Shape = (int[])shape.Clone();
+
+            RequiresGrad = requiresGrad;
+            GradFn = null;
+            OpArgs = new Dictionary<string, object>();
+            Father = null;
+            LeftLeaf = null;
+            RightLeaf = null;
+            if (requiresGrad)
+            {
+                Gradient = new Tensor(Shape, false);
+            }
+        }
+
+        public Tensor(AlignedArray<float> data, int[] shape, bool requiresGrad = false)
+        {
+            if (data == null)
+                throw new ArgumentNullException(nameof(data), "Data cannot be null");
+            if (shape == null)
+                throw new ArgumentNullException(nameof(shape), "Shape cannot be null");
+            if (shape.Length == 0)
+                throw new ArgumentException("Shape must have at least one dimension");
+            foreach (int dim in shape)
+            {
+                if (dim <= 0)
+                    throw new ArgumentException("All dimensions must be positive integers");
+            }
+
+            int totalElements = shape.Aggregate(1, (a, b) => a * b);
+            if (data.Length != totalElements)
+                throw new ArgumentException($"Data length ({data.Length}) does not match shape product ({totalElements})");
+
+            Data = data;
             Shape = (int[])shape.Clone();
 
             RequiresGrad = requiresGrad;
@@ -188,21 +222,12 @@
 
         public Tensor Clone()
         {
-            float[] dataCopy = (float[])Data.Clone();
-            int[] shapeCopy = (int[])Shape.Clone();
-            bool requiresGrad = RequiresGrad;
-            Tensor gradientCopy = null;
-            if (requiresGrad)
-            {
-                gradientCopy = Gradient.Clone();
-            }
-
             Tensor copy = new Tensor()
             {
-                Data = dataCopy,
-                Shape = shapeCopy,
-                RequiresGrad = requiresGrad,
-                Gradient = gradientCopy,
+                Data = Data.Clone(),
+                Shape = (int[])Shape.Clone(),
+                RequiresGrad = RequiresGrad,
+                Gradient = Gradient?.Clone(),
                 GradFn = null,
                 OpArgs = new Dictionary<string, object>(),
                 Father = null,

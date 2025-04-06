@@ -218,7 +218,7 @@
                 throw new InvalidOperationException($"Shape mismatch: cannot reshape gradient {string.Join(",", gradient.Shape)} to original shape {string.Join(",", leftLeaf.Shape)}");
             }
 
-            Tensor reshapedGradient = new Tensor((float[])gradient.Data.Clone(), leftLeaf.Shape, gradient.RequiresGrad);
+            Tensor reshapedGradient = new Tensor(gradient.Data.Clone(), leftLeaf.Shape, gradient.RequiresGrad);
 
             return (reshapedGradient, null);
         }
