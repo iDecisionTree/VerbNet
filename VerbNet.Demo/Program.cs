@@ -46,6 +46,8 @@ namespace VerbNet.Demo
             }
             avgTime /= times.Length;
             Console.WriteLine($"Average Time: {avgTime}ms");
+
+            Console.ReadLine();
         }
     }
 }
