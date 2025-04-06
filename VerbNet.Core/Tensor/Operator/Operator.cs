@@ -1,4 +1,5 @@
 ﻿using System.Runtime.Intrinsics.X86;
+using static System.Reflection.Metadata.BlobBuilder;
 
 namespace VerbNet.Core
 {
@@ -15,6 +16,7 @@ namespace VerbNet.Core
             {
                 ScalarOperator.Add(a.Ptr, b.Ptr, result.Ptr, a.Length);
             }
+
             return result;
         }
 
@@ -29,6 +31,7 @@ namespace VerbNet.Core
             {
                 ScalarOperator.Subtract(a.Ptr, b.Ptr, result.Ptr, a.Length);
             }
+
             return result;
         }
 
@@ -43,6 +46,7 @@ namespace VerbNet.Core
             {
                 ScalarOperator.Multiply(a.Ptr, b.Ptr, result.Ptr, a.Length);
             }
+
             return result;
         }
 
@@ -57,6 +61,7 @@ namespace VerbNet.Core
             {
                 ScalarOperator.Divide(a.Ptr, b.Ptr, result.Ptr, a.Length);
             }
+
             return result;
         }
 
@@ -71,6 +76,7 @@ namespace VerbNet.Core
             {
                 ScalarOperator.Negate(a.Ptr, result.Ptr, a.Length);
             }
+
             return result;
         }
 
@@ -85,6 +91,7 @@ namespace VerbNet.Core
             {
                 ScalarOperator.Abs(a.Ptr, result.Ptr, a.Length);
             }
+
             return result;
         }
 
@@ -99,6 +106,7 @@ namespace VerbNet.Core
             {
                 ScalarOperator.Sign(a.Ptr, result.Ptr, a.Length);
             }
+
             return result;
         }
 
@@ -113,6 +121,7 @@ namespace VerbNet.Core
             {
                 ScalarOperator.Sqrt(a.Ptr, result.Ptr, a.Length);
             }
+
             return result;
         }
 
@@ -127,6 +136,7 @@ namespace VerbNet.Core
             {
                 ScalarOperator.LogE(a.Ptr, result.Ptr, a.Length);
             }
+
             return result;
         }
 
@@ -141,6 +151,7 @@ namespace VerbNet.Core
             {
                 ScalarOperator.Exp(a.Ptr, result.Ptr, a.Length);
             }
+
             return result;
         }
 
@@ -148,6 +159,7 @@ namespace VerbNet.Core
         {
             AlignedArray<float> result = new AlignedArray<float>(a.Length, a.Alignment);
             ScalarOperator.Power(a.Ptr, exponent, result.Ptr, a.Length);
+
             return result;
         }
 
@@ -155,6 +167,7 @@ namespace VerbNet.Core
         {
             AlignedArray<float> result = new AlignedArray<float>(a.Length, a.Alignment);
             ScalarOperator.Sin(a.Ptr, result.Ptr, a.Length);
+
             return result;
         }
 
@@ -162,6 +175,7 @@ namespace VerbNet.Core
         {
             AlignedArray<float> result = new AlignedArray<float>(a.Length, a.Alignment);
             ScalarOperator.Cos(a.Ptr, result.Ptr, a.Length);
+
             return result;
         }
 
@@ -169,6 +183,7 @@ namespace VerbNet.Core
         {
             AlignedArray<float> result = new AlignedArray<float>(a.Length, a.Alignment);
             ScalarOperator.Tan(a.Ptr, result.Ptr, a.Length);
+
             return result;
         }
 
@@ -176,6 +191,7 @@ namespace VerbNet.Core
         {
             AlignedArray<float> result = new AlignedArray<float>(a.Length, a.Alignment);
             ScalarOperator.Sinh(a.Ptr, result.Ptr, a.Length);
+
             return result;
         }
 
@@ -183,6 +199,7 @@ namespace VerbNet.Core
         {
             AlignedArray<float> result = new AlignedArray<float>(a.Length, a.Alignment);
             ScalarOperator.Cosh(a.Ptr, result.Ptr, a.Length);
+
             return result;
         }
 
@@ -190,6 +207,7 @@ namespace VerbNet.Core
         {
             AlignedArray<float> result = new AlignedArray<float>(a.Length, a.Alignment);
             ScalarOperator.Tanh(a.Ptr, result.Ptr, a.Length);
+
             return result;
         }
 
@@ -206,14 +224,21 @@ namespace VerbNet.Core
             {
                 ScalarOperator.MatMul(a.Ptr, b.Ptr, result.Ptr, aRows, aCols, bCols);
             }
+
             return result;
         }
 
         public static AlignedArray<float> Transpose(AlignedArray<float> a, int rows, int cols)
         {
-            AlignedArray<float> result = new AlignedArray<float>(a.Length, a.Alignment);
-            ScalarOperator.Transpose(a.Ptr, result.Ptr, rows, cols);
-
+            AlignedArray<float> result = new AlignedArray<float>(rows * cols, a.Alignment);
+            if (Avx.IsSupported)
+            {
+                SimdOperator.Transpose(a.Ptr, result.Ptr, rows, cols);
+            }
+            else
+            {
+                ScalarOperator.Transpose(a.Ptr, result.Ptr, rows, cols);
+            }
             return result;
         }
     }
