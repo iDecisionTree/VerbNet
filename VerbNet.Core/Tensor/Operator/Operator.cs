@@ -1,5 +1,4 @@
 ﻿using System.Runtime.Intrinsics.X86;
-using static System.Reflection.Metadata.BlobBuilder;
 
 namespace VerbNet.Core
 {

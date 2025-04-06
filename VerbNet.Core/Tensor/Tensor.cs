@@ -18,6 +18,8 @@
         public readonly static Tensor Zero = new Tensor([0f], [1], false);
         public readonly static Tensor One = new Tensor([1f], [1], false);
 
+        private static ParallelOptions _parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = 2 };
+
         public Tensor(int[] shape, bool requiresGrad = false)
         {
             if (shape == null)
@@ -198,25 +200,35 @@
                 externalGradient = One;
             }
 
-            Gradient = TensorOperator.Add(Gradient, externalGradient, false);
+            lock (this)
+            {
+                Gradient = TensorOperator.Add(Gradient, externalGradient, false);
+            }
 
             if (GradFn != null)
             {
                 (Tensor leftGrad, Tensor rightGrad) = GradFn(Gradient, LeftLeaf, RightLeaf, OpArgs);
 
-                if (LeftLeaf != null && LeftLeaf.RequiresGrad)
-                {
-                    if (leftGrad == null)
-                        throw new InvalidOperationException("Left gradient is null for a tensor that requires grad.");
-                    LeftLeaf.Backward(leftGrad);
-                }
-
-                if (RightLeaf != null && RightLeaf.RequiresGrad)
-                {
-                    if (rightGrad == null)
-                        throw new InvalidOperationException("Right gradient is null for a tensor that requires grad.");
-                    RightLeaf.Backward(rightGrad);
-                }
+                Parallel.Invoke(_parallelOptions,
+                    () =>
+                    {
+                        if (LeftLeaf != null && LeftLeaf.RequiresGrad)
+                        {
+                            if (leftGrad == null)
+                                throw new InvalidOperationException("Left gradient is null for a tensor that requires grad.");
+                            LeftLeaf.Backward(leftGrad);
+                        }
+                    },
+                    () =>
+                    {
+                        if (RightLeaf != null && RightLeaf.RequiresGrad)
+                        {
+                            if (rightGrad == null)
+                                throw new InvalidOperationException("Right gradient is null for a tensor that requires grad.");
+                            RightLeaf.Backward(rightGrad);
+                        }
+                    }
+                );
             }
         }
 
