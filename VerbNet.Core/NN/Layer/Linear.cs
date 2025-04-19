@@ -1,26 +1,30 @@
-﻿namespace VerbNet.Core
+﻿using System.Xml.Linq;
+
+namespace VerbNet.Core
 {
     public class Linear : Layer
     {
         public Tensor Weight;
         public bool HasBias;
         public Tensor Bias;
+        public string Name;
 
         private int _inputSize;
         private int _outputSize;
 
-        public Linear(int input, int output, bool hasBias = false, float learningRate = 0.001f)
+        public Linear(int input, int output, bool hasBias = false, float learningRate = 0.001f, string name = "")
         {
             _inputSize = input;
             _outputSize = output;
             LearningRate = learningRate;
+            Name = name;
 
-            Weight = Tensor.Random([input, output], true, MathF.Sqrt(2f / (float)input));
+            Weight = Tensor.Random([input, output], MathF.Sqrt(2f / (float)input), true, $"{Name}_weight");
 
             HasBias = hasBias;
             if (hasBias)
             {
-                Bias = new Tensor([output], true);
+                Bias = new Tensor([output], true, $"{Name}_bias");
             }
         }
 

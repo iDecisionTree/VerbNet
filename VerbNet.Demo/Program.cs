@@ -8,9 +8,9 @@ namespace VerbNet.Demo
         static void Main(string[] args)
         {
             LayerList layers = new LayerList(
-                new Linear(64, 1024, true, 0.001f),
-                new Linear(1024, 1024, true, 0.0001f),
-                new Linear(1024, 1, true, 0.001f),
+                new Linear(64, 1024, true, 0.001f, "linear1"),
+                new Linear(1024, 1024, true, 0.0001f, "linear2"),
+                new Linear(1024, 1, true, 0.001f, "linear3"),
                 new Tanh()
                 );
             L1Loss l1 = new L1Loss();

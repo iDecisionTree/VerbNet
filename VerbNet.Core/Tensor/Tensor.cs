@@ -1,4 +1,6 @@
-﻿namespace VerbNet.Core
+﻿using System.Xml.Linq;
+
+namespace VerbNet.Core
 {
     public class Tensor
     {
@@ -6,6 +8,7 @@
         public int Length => Data.Length;
         public int[] Shape;
         public int Rank => Shape.Length;
+        public string Name;
 
         public bool RequiresGrad;
         public Tensor Gradient;
@@ -20,7 +23,7 @@
 
         private static ParallelOptions _parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = 2 };
 
-        public Tensor(int[] shape, bool requiresGrad = false)
+        public Tensor(int[] shape, bool requiresGrad = false, string name = "")
         {
             if (shape == null)
                 throw new ArgumentNullException(nameof(shape), "Shape cannot be null");
@@ -34,6 +37,7 @@
 
             Data = new AlignedArray<float>(shape.Aggregate(1, (a, b) => a * b), 32);
             Shape = (int[])shape.Clone();
+            Name = name;
 
             RequiresGrad = requiresGrad;
             GradFn = null;
@@ -47,7 +51,7 @@
             }
         }
 
-        public Tensor(float[] data, int[] shape, bool requiresGrad = false)
+        public Tensor(float[] data, int[] shape, bool requiresGrad = false, string name = "")
         {
             if (data == null)
                 throw new ArgumentNullException(nameof(data), "Data cannot be null");
@@ -67,6 +71,7 @@
 
             Data = new AlignedArray<float>(data, 32);
             Shape = (int[])shape.Clone();
+            Name = name;
 
             RequiresGrad = requiresGrad;
             GradFn = null;
@@ -80,7 +85,7 @@
             }
         }
 
-        public Tensor(AlignedArray<float> data, int[] shape, bool requiresGrad = false)
+        public Tensor(AlignedArray<float> data, int[] shape, bool requiresGrad = false, string name = "")
         {
             if (data == null)
                 throw new ArgumentNullException(nameof(data), "Data cannot be null");
@@ -100,6 +105,7 @@
 
             Data = data;
             Shape = (int[])shape.Clone();
+            Name = name;
 
             RequiresGrad = requiresGrad;
             GradFn = null;
@@ -188,7 +194,7 @@
         public static Tensor Transpose(Tensor a) => TensorOperator.Transpose(a, true);
         public static Tensor MatMul(Tensor a, Tensor b) => TensorOperator.MatMul(a, b, true);
 
-        public static Tensor Random(int[] shape, bool requiresGrad = false, float scale = 1f) => TensorOperator.Random(shape, requiresGrad, scale);
+        public static Tensor Random(int[] shape, float scale = 1f, bool requiresGrad = false, string name = "") => TensorOperator.Random(shape, scale, requiresGrad, name);
 
         public void Backward(Tensor externalGradient = null)
         {
@@ -238,6 +244,7 @@
             {
                 Data = Data.Clone(),
                 Shape = (int[])Shape.Clone(),
+                Name = Name,
                 RequiresGrad = RequiresGrad,
                 Gradient = Gradient?.Clone(),
                 GradFn = null,
