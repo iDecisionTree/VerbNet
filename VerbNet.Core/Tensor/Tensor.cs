@@ -1,4 +1,6 @@
-﻿using System.Xml.Linq;
+﻿using System.Runtime.ExceptionServices;
+using System.Runtime.InteropServices;
+using System.Xml.Linq;
 
 namespace VerbNet.Core
 {
@@ -255,6 +257,54 @@ namespace VerbNet.Core
             };
 
             return copy;
+        }
+
+        public BinaryWriter Write(BinaryWriter bw)
+        {
+            bw.Write(Name);
+
+            bw.Write(Shape.Length);
+            bw.Write(MemoryMarshal.AsBytes(Shape.AsSpan()));
+
+            bw.Write(Data.Length);
+            bw.Write(MemoryMarshal.AsBytes(Data.AsSpan()));
+
+            bw.Write(RequiresGrad);
+            if (RequiresGrad)
+            {
+                bw = Gradient.Write(bw);
+            }
+
+            return bw;
+        }
+
+        public unsafe BinaryReader Read(BinaryReader br)
+        {
+            Name = br.ReadString();
+
+            int shapeLength = br.ReadInt32();
+            Shape = new int[shapeLength];
+            byte[] shapeBytes = br.ReadBytes(shapeLength * sizeof(int));
+            Buffer.BlockCopy(shapeBytes, 0, Shape, 0, shapeBytes.Length);
+
+            int dataLength = br.ReadInt32();
+            Data = new AlignedArray<float>(dataLength);
+            byte[] dataBytes = br.ReadBytes(dataLength * sizeof(float));
+
+            fixed (byte* sourcePtr = dataBytes)
+            fixed (float* destPtr = Data.AsSpan())
+            {
+                Buffer.MemoryCopy(sourcePtr, destPtr, dataBytes.Length, dataBytes.Length);
+            }
+
+            RequiresGrad = br.ReadBoolean();
+            if (RequiresGrad)
+            {
+                Gradient = new Tensor();
+                Gradient.Read(br);
+            }
+
+            return br;
         }
     }
 }

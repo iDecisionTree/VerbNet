@@ -6,6 +6,7 @@ namespace VerbNet.Core
     public unsafe class AlignedArray<T> : IDisposable where T : unmanaged
     {
         public T* Ptr => _ptr;
+        public Span<T> Span => AsSpan();
         public int Length => _length;
         public int Alignment => _alignment;
 
@@ -65,6 +66,14 @@ namespace VerbNet.Core
                 throw new ObjectDisposedException(nameof(AlignedArray<T>));
 
             return new ReadOnlySpan<T>(_ptr, _length);
+        }
+
+        public T[] ToArray()
+        {
+            if (_disposed)
+                throw new ObjectDisposedException(nameof(AlignedArray<T>));
+
+            return AsSpan().ToArray();
         }
 
         public void Fill(T value)

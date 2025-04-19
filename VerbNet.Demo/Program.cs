@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Net.Http.Headers;
 using VerbNet.Core;
 
 namespace VerbNet.Demo
@@ -7,6 +8,7 @@ namespace VerbNet.Demo
     {
         static void Main(string[] args)
         {
+            
             LayerList layers = new LayerList(
                 new Linear(64, 1024, true, 0.001f, "linear1"),
                 new Linear(1024, 1024, true, 0.0001f, "linear2"),
@@ -48,6 +50,22 @@ namespace VerbNet.Demo
             Console.WriteLine($"Average Time: {avgTime}ms");
 
             Console.ReadLine();
+            
+
+            /*
+            Tensor testTensor = Tensor.Random([4096, 4096], 1f, true, "TestTensor");
+            FileStream fs = File.Create("TestTensor.bin");
+            BinaryWriter bw = new BinaryWriter(fs);
+            testTensor.Write(bw);
+            fs.Close();
+            */
+
+            /*
+            Tensor testTensor = Tensor.Zero;
+            FileStream fs = File.OpenRead("TestTensor.bin");
+            BinaryReader br = new BinaryReader(fs);
+            testTensor.Read(br);
+            */
         }
     }
 }
