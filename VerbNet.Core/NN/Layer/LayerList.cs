@@ -40,5 +40,33 @@
                 Layers[i].ZeroGrad();
             }
         }
+
+        public void Save(string path)
+        {
+            using (FileStream fs = new FileStream(path, FileMode.OpenOrCreate))
+            {
+                using (BinaryWriter bw = new BinaryWriter(fs))
+                {
+                    for (int i = 0; i < Layers.Count; i++)
+                    {
+                        Layers[i].Write(bw);
+                    }    
+                }
+            }
+        }
+
+        public void Load(string path)
+        {
+            using (FileStream fs = new FileStream(path, FileMode.Open))
+            {
+                using (BinaryReader br = new BinaryReader(fs))
+                {
+                    for (int i = 0; i < Layers.Count; i++)
+                    {
+                        Layers[i].Read(br);
+                    }
+                }   
+            }
+        }
     }
 }

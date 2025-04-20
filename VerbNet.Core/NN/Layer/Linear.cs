@@ -101,6 +101,10 @@ namespace VerbNet.Core
                     br = Bias.Read(br);
                 }
             }
+            else
+            {
+                throw new InvalidDataException("Invalid layer type.");
+            }
 
             return br;
         }

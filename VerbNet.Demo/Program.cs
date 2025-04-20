@@ -15,14 +15,14 @@ namespace VerbNet.Demo
                 new Linear(1024, 1, true, 0.001f, "linear3"),
                 new Tanh()
                 );
-            L1Loss l1 = new L1Loss();
+            MSELoss mse = new MSELoss();
 
             Tensor input = Tensor.Random([4, 64]);
             Tensor target = Tensor.Random([4, 1]);
 
             Stopwatch stopwatch = new Stopwatch();
 
-            float[] times = new float[500];
+            float[] times = new float[50];
             for (int i = 0; i < times.Length; i++)
             {
                 layers.ZeroGrad();
@@ -30,13 +30,13 @@ namespace VerbNet.Demo
                 stopwatch.Restart();
 
                 Tensor output = layers.Forward(input);
-                l1.Forward(output, target);
-                l1.Backward();
+                mse.Forward(output, target);
+                mse.Backward();
 
                 stopwatch.Stop();
 
                 times[i] = stopwatch.ElapsedMilliseconds;
-                Console.WriteLine($"Epoch: {i}/{times.Length}, Loss: {l1.LossValue}, Time: {stopwatch.ElapsedMilliseconds}ms");
+                Console.WriteLine($"Epoch: {i}/{times.Length}, Loss: {mse.LossValue}, Time: {stopwatch.ElapsedMilliseconds}ms");
 
                 layers.ApplyGrad();
             }
@@ -50,22 +50,10 @@ namespace VerbNet.Demo
             Console.WriteLine($"Average Time: {avgTime}ms");
 
             Console.ReadLine();
-            
 
-            /*
-            Tensor testTensor = Tensor.Random([4096, 4096], 1f, true, "TestTensor");
-            FileStream fs = File.Create("TestTensor.bin");
-            BinaryWriter bw = new BinaryWriter(fs);
-            testTensor.Write(bw);
-            fs.Close();
-            */
+            layers.Save("TestModel.bin");
 
-            /*
-            Tensor testTensor = Tensor.Zero;
-            FileStream fs = File.OpenRead("TestTensor.bin");
-            BinaryReader br = new BinaryReader(fs);
-            testTensor.Read(br);
-            */
+            //layers.Load("TestModel.bin");
         }
     }
 }
