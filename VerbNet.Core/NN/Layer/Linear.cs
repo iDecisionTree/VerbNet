@@ -7,7 +7,6 @@ namespace VerbNet.Core
         public Tensor Weight;
         public bool HasBias;
         public Tensor Bias;
-        public string Name;
 
         private int _inputSize;
         private int _outputSize;
@@ -68,6 +67,42 @@ namespace VerbNet.Core
             {
                 Bias.Gradient.Data.Fill(0f);
             }
+        }
+
+        public override BinaryWriter Write(BinaryWriter bw)
+        {
+            bw.Write((int)LayerType.Linear);
+            bw.Write(Name);
+            bw.Write(LearningRate);
+            bw.Write(_inputSize);
+            bw.Write(_outputSize);
+            bw = Weight.Write(bw);
+            bw.Write(HasBias);
+            if(HasBias)
+            {
+                bw = Bias.Write(bw);
+            }
+
+            return bw;
+        }
+
+        public override BinaryReader Read(BinaryReader br)
+        {
+            if (br.ReadInt32() == (int)LayerType.Linear)
+            {
+                Name = br.ReadString();
+                LearningRate = br.ReadSingle();
+                _inputSize = br.ReadInt32();
+                _outputSize = br.ReadInt32();
+                br = Weight.Read(br);
+                HasBias = br.ReadBoolean();
+                if(HasBias)
+                {
+                    br = Bias.Read(br);
+                }
+            }
+
+            return br;
         }
     }
 }
