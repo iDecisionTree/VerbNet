@@ -16,6 +16,7 @@ namespace VerbNet.Demo
                 new Tanh()
                 );
             MSELoss mse = new MSELoss();
+            SGDOptimizer optim = new SGDOptimizer(layers.GetParameters(), 0.0001f);
 
             Tensor input = Tensor.Random([4, 64]);
             Tensor target = Tensor.Random([4, 1]);
@@ -25,7 +26,7 @@ namespace VerbNet.Demo
             float[] times = new float[50];
             for (int i = 0; i < times.Length; i++)
             {
-                layers.ZeroGrad();
+                optim.ZeroGrad();
 
                 stopwatch.Restart();
 
@@ -38,7 +39,7 @@ namespace VerbNet.Demo
                 times[i] = stopwatch.ElapsedMilliseconds;
                 Console.WriteLine($"Epoch: {i}/{times.Length}, Loss: {mse.LossValue}, Time: {stopwatch.ElapsedMilliseconds}ms");
 
-                layers.ApplyGrad();
+                optim.Step();
             }
 
             float avgTime = 0f;

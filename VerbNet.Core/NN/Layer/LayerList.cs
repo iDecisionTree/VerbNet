@@ -1,4 +1,6 @@
-﻿namespace VerbNet.Core
+﻿using System.Reflection.Metadata.Ecma335;
+
+namespace VerbNet.Core
 {
     public class LayerList
     {
@@ -39,6 +41,21 @@
             {
                 Layers[i].ZeroGrad();
             }
+        }
+
+        public Tensor[] GetParameters()
+        {
+            List<Tensor> parameters = new List<Tensor>();
+            for (int i = 0; i < Layers.Count; i++)
+            {
+                Tensor[] layerParams = Layers[i].GetParameters();
+                for (int j = 0; j < layerParams.Length; j++)
+                {
+                    parameters.Add(layerParams[j]);
+                }
+            }
+
+            return parameters.ToArray();
         }
 
         public void Save(string path)

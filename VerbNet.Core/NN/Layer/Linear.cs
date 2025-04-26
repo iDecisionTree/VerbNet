@@ -69,6 +69,18 @@ namespace VerbNet.Core
             }
         }
 
+        public override Tensor[] GetParameters()
+        {
+            List<Tensor> parameters = new List<Tensor>();
+            parameters.Add(Weight);
+            if (HasBias)
+            {
+                parameters.Add(Bias);
+            }
+
+            return parameters.ToArray();
+        }
+
         public override BinaryWriter Write(BinaryWriter bw)
         {
             bw.Write((int)LayerType.Linear);

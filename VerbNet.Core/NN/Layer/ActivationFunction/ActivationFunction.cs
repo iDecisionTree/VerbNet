@@ -15,6 +15,11 @@ namespace VerbNet.Core
 
         }
 
+        public override Tensor[] GetParameters()
+        {
+            return Array.Empty<Tensor>();
+        }
+
         public override BinaryWriter Write(BinaryWriter bw)
         {
             return bw;
