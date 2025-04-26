@@ -16,7 +16,7 @@
 - [x] 实现更多的激活函数，如 ReLU、Sigmoid、Tanh 等。
 - [x] 优化程序。
 - [ ] 支持更复杂的损失函数，如交叉熵损失、Huber 损失等。
-- [ ] 增加优化器，如 SGD、Adam、RMSProp 等。
+- [x] 增加优化器，如 SGD、Adam、RMSProp 等。
 - [ ] 增加更多的神经网络层。
 - [ ] 支持GPU运算。
 
