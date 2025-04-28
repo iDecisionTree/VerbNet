@@ -16,14 +16,14 @@ namespace VerbNet.Demo
                 new Tanh()
                 );
             MSELoss mse = new MSELoss();
-            SGDOptimizer optim = new SGDOptimizer(layers.GetParameters(), 0.0001f);
+            AdamOptimizer optim = new AdamOptimizer(layers.GetParameters(), 0.0001f);
 
             Tensor input = Tensor.Random([4, 64]);
             Tensor target = Tensor.Random([4, 1]);
 
             Stopwatch stopwatch = new Stopwatch();
 
-            float[] times = new float[50];
+            float[] times = new float[200];
             for (int i = 0; i < times.Length; i++)
             {
                 optim.ZeroGrad();
