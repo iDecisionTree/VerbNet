@@ -14,6 +14,7 @@ namespace VerbNet.Core
         private readonly int _length;
         private readonly nuint _byteLength;
         private readonly int _alignment;
+
         private bool _disposed;
 
         public AlignedArray(int length, int alignment = 32)

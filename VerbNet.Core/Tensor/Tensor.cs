@@ -4,7 +4,7 @@ using System.Xml.Linq;
 
 namespace VerbNet.Core
 {
-    public class Tensor
+    public class Tensor : IDisposable
     {
         public AlignedArray<float> Data;
         public int Length => Data.Length;
@@ -24,6 +24,8 @@ namespace VerbNet.Core
         public readonly static Tensor One = new Tensor([1f], [1], false);
 
         private static ParallelOptions _parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = 2 };
+        
+        private bool disposed;
 
         public Tensor(int[] shape, bool requiresGrad = false, string name = "")
         {
@@ -39,7 +41,7 @@ namespace VerbNet.Core
 
             Data = new AlignedArray<float>(shape.Aggregate(1, (a, b) => a * b), 32);
             Shape = (int[])shape.Clone();
-            Name = name;
+            Name = "name";
 
             RequiresGrad = requiresGrad;
             GradFn = null;
@@ -73,7 +75,7 @@ namespace VerbNet.Core
 
             Data = new AlignedArray<float>(data, 32);
             Shape = (int[])shape.Clone();
-            Name = name;
+            Name = "name";
 
             RequiresGrad = requiresGrad;
             GradFn = null;
@@ -107,7 +109,7 @@ namespace VerbNet.Core
 
             Data = data;
             Shape = (int[])shape.Clone();
-            Name = name;
+            Name = "name";
 
             RequiresGrad = requiresGrad;
             GradFn = null;
@@ -305,6 +307,33 @@ namespace VerbNet.Core
             }
 
             return br;
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposed)
+            {
+                Data.Dispose();
+                Gradient?.Dispose();
+
+                disposed = true; 
+            }
+        }
+
+        ~Tensor()
+        {
+            Dispose(false);
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+
+            Father = null;
+            LeftLeaf = null;
+            RightLeaf = null;
+
+            GC.SuppressFinalize(this);
         }
     }
 }
