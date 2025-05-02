@@ -41,7 +41,7 @@ namespace VerbNet.Core
 
             Data = new AlignedArray<float>(shape.Aggregate(1, (a, b) => a * b), 32);
             Shape = (int[])shape.Clone();
-            Name = "name";
+            Name = name;
 
             RequiresGrad = requiresGrad;
             GradFn = null;
@@ -75,7 +75,7 @@ namespace VerbNet.Core
 
             Data = new AlignedArray<float>(data, 32);
             Shape = (int[])shape.Clone();
-            Name = "name";
+            Name = name;
 
             RequiresGrad = requiresGrad;
             GradFn = null;
@@ -109,7 +109,7 @@ namespace VerbNet.Core
 
             Data = data;
             Shape = (int[])shape.Clone();
-            Name = "name";
+            Name = name;
 
             RequiresGrad = requiresGrad;
             GradFn = null;
