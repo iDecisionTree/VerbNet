@@ -15,8 +15,8 @@ namespace VerbNet.Core
             MaxDegreeOfParallelism = _maxDegreeOfParallelism
         };
         private static Vector256<float> _zeroVec = Vector256<float>.Zero;
-        private static Vector256<float> _oneVec = Vector256.Create(1.0f);
-        private static Vector256<float> _minusOneVec = Vector256.Create(-1.0f);
+        private static Vector256<float> _oneVec = Vector256.Create(1f);
+        private static Vector256<float> _minusOneVec = Vector256.Create(-1f);
 
         public static void Add(float* a, float* b, float* result, int length)
         {
