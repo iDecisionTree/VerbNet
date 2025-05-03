@@ -7,8 +7,8 @@ namespace VerbNet.Core
         public float Epsilon;
 
         public int T;
-        public float[][] M;
-        public float[][] V;
+        public Tensor[] M;
+        public Tensor[] V;
 
         public AdamOptimizer(Tensor[] parameters, float learningRate, float beta1 = 0.9f, float beta2 = 0.999f, float epsilon = 0.00000001f) : base(parameters, learningRate)
         {
@@ -17,12 +17,12 @@ namespace VerbNet.Core
             Epsilon = epsilon;
 
             T = 0;
-            M = new float[parameters.Length][];
-            V = new float[parameters.Length][];
+            M = new Tensor[parameters.Length];
+            V = new Tensor[parameters.Length];
             for (int i = 0; i < parameters.Length; i++)
             {
-                M[i] = new float[parameters[i].Length];
-                V[i] = new float[parameters[i].Length];
+                M[i] = new Tensor(parameters[i].Shape, false);
+                V[i] = new Tensor(parameters[i].Shape, false);
             }
         }
 
@@ -31,14 +31,16 @@ namespace VerbNet.Core
             T++;
             for (int i = 0; i < Parameters.Length; i++)
             {
+                M[i] = Beta1 * M[i] + (1f - Beta1) * Parameters[i].Gradient;
+                V[i] = Beta2 * V[i] + (1f - Beta2) * Tensor.Pow(Parameters[i].Gradient, 2f);
+
+                Tensor mHat = M[i] / (1f - MathF.Pow(Beta1, T));
+                Tensor vHat = V[i] / (1f - MathF.Pow(Beta2, T));
+
+                Tensor delta = LearningRate * mHat / (Tensor.Sqrt(vHat) + Epsilon);
                 for (int j = 0; j < Parameters[i].Length; j++)
                 {
-                    M[i][j] = Beta1 * M[i][j] + (1f - Beta1) * Parameters[i].Gradient.Data[j];
-                    V[i][j] = Beta2 * V[i][j] + (1f - Beta2) * MathF.Pow(Parameters[i].Gradient.Data[j], 2f);
-                    float mHat = M[i][j] / (1f - MathF.Pow(Beta1, T));
-                    float vHat = V[i][j] / (1f - MathF.Pow(Beta2, T));
-
-                    Parameters[i].Data[j] -= LearningRate * mHat / (MathF.Sqrt(vHat) + Epsilon);
+                    Parameters[i].Data[j] -= delta.Data[j];
                 }
             }
         }

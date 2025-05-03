@@ -173,9 +173,17 @@ namespace VerbNet.Core
         }
 
         public static Tensor operator +(Tensor a, Tensor b) => TensorOperator.Add(a, b, true);
+        public static Tensor operator +(Tensor a, float b) => TensorOperator.Add(a, b, false);
+        public static Tensor operator +(float a, Tensor b) => TensorOperator.Add(b, a, false);
         public static Tensor operator -(Tensor a, Tensor b) => TensorOperator.Subtract(a, b, true);
+        public static Tensor operator -(Tensor a, float b) => TensorOperator.Subtract(a, b, false);
+        public static Tensor operator -(float a, Tensor b) => TensorOperator.Subtract(a, b, false);
         public static Tensor operator *(Tensor a, Tensor b) => TensorOperator.Multiply(a, b, true);
+        public static Tensor operator *(Tensor a, float b) => TensorOperator.Multiply(a, b, false);
+        public static Tensor operator *(float a, Tensor b) => TensorOperator.Multiply(b, a, false);
         public static Tensor operator /(Tensor a, Tensor b) => TensorOperator.Divide(a, b, true);
+        public static Tensor operator /(Tensor a, float b) => TensorOperator.Divide(a, b, false);
+        public static Tensor operator /(float a, Tensor b) => TensorOperator.Divide(a, b, false);
         public static Tensor operator -(Tensor a) => TensorOperator.Negate(a, true);
 
         public Tensor Repeat(int axis, int repeat = 2) => TensorOperator.Repeat(this, axis, repeat, true);
