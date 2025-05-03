@@ -28,7 +28,7 @@ namespace VerbNet.Core
             }
         }
 
-        public static void Substract(float* a, float b, float* result, int length)
+        public static void Subtract(float* a, float b, float* result, int length)
         {
             for (int i = 0; i < length; i++)
             {
@@ -36,7 +36,7 @@ namespace VerbNet.Core
             }
         }
 
-        public static void Substract(float a, float* b, float* result, int length)
+        public static void Subtract(float a, float* b, float* result, int length)
         {
             for (int i = 0; i < length; i++)
             {

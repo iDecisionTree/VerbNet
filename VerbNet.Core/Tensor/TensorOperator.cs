@@ -27,6 +27,24 @@
             return result;
         }
 
+        public static Tensor Add(Tensor a, float b, bool buildGraph = true)
+        {
+            if (a == null)
+                throw new ArgumentNullException(nameof(a));
+
+            bool requiresGrad = buildGraph && a.RequiresGrad;
+            Tensor result = new Tensor(Operator.Add(a.Data, b), a.Shape, requiresGrad);
+
+            if (buildGraph)
+            {
+                result.GradFn = GradFunction.AddGradFn;
+                result.LeftLeaf = a;
+                result.LeftLeaf.Father = result;    
+            }
+
+            return result;
+        }
+
         public static Tensor Subtract(Tensor a, Tensor b, bool buildGraph = true)
         {
             if (a == null)
@@ -46,6 +64,42 @@
                 result.LeftLeaf = a;
                 result.RightLeaf = b;
                 result.LeftLeaf.Father = result;
+                result.RightLeaf.Father = result;
+            }
+
+            return result;
+        }
+
+        public static Tensor Subtract(Tensor a, float b, bool buildGraph = true)
+        {
+            if (a == null)
+                throw new ArgumentNullException(nameof(a));
+
+            bool requiresGrad = buildGraph && a.RequiresGrad;
+            Tensor result = new Tensor(Operator.Subtract(a.Data, b), a.Shape, requiresGrad);
+
+            if (buildGraph)
+            {
+                result.GradFn = GradFunction.SubGradFn;
+                result.LeftLeaf = a;
+                result.LeftLeaf.Father = result;
+            }
+
+            return result;
+        }
+
+        public static Tensor Subtract(float a, Tensor b, bool buildGraph = true)
+        {
+            if (b == null)
+                throw new ArgumentNullException(nameof(b));
+
+            bool requiresGrad = buildGraph && b.RequiresGrad;
+            Tensor result = new Tensor(Operator.Subtract(a, b.Data), b.Shape, requiresGrad);
+
+            if (buildGraph)
+            {
+                result.GradFn = GradFunction.SubGradFn;
+                result.RightLeaf = b;
                 result.RightLeaf.Father = result;
             }
 
@@ -77,6 +131,24 @@
             return result;
         }
 
+        public static Tensor Multiply(Tensor a, float b, bool buildGraph = true)
+        {
+            if (a == null)
+                throw new ArgumentNullException(nameof(a));
+
+            bool requiresGrad = buildGraph && a.RequiresGrad;
+            Tensor result = new Tensor(Operator.Multiply(a.Data, b), a.Shape, requiresGrad);
+
+            if (buildGraph)
+            {
+                result.GradFn = GradFunction.MulGradFn;
+                result.LeftLeaf = a;
+                result.LeftLeaf.Father = result;
+            }
+
+            return result;
+        }
+
         public static Tensor Divide(Tensor a, Tensor b, bool buildGraph = true)
         {
             if (a == null)
@@ -96,6 +168,42 @@
                 result.LeftLeaf = a;
                 result.RightLeaf = b;
                 result.LeftLeaf.Father = result;
+                result.RightLeaf.Father = result;
+            }
+
+            return result;
+        }
+
+        public static Tensor Divide(Tensor a, float b, bool buildGraph = true)
+        {
+            if (a == null)
+                throw new ArgumentNullException(nameof(a));
+
+            bool requiresGrad = buildGraph && a.RequiresGrad;
+            Tensor result = new Tensor(Operator.Divide(a.Data, b), a.Shape, requiresGrad);
+
+            if (buildGraph)
+            {
+                result.GradFn = GradFunction.DivGradFn;
+                result.LeftLeaf = a;
+                result.LeftLeaf.Father = result;
+            }
+
+            return result;
+        }
+
+        public static Tensor Divide(float a, Tensor b, bool buildGraph = true)
+        {
+            if (b == null)
+                throw new ArgumentNullException(nameof(b));
+
+            bool requiresGrad = buildGraph && b.RequiresGrad;
+            Tensor result = new Tensor(Operator.Divide(a, b.Data), b.Shape, requiresGrad);
+
+            if (buildGraph)
+            {
+                result.GradFn = GradFunction.DivGradFn;
+                result.RightLeaf = b;
                 result.RightLeaf.Father = result;
             }
 
