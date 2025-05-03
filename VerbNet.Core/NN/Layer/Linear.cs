@@ -1,6 +1,4 @@
-﻿using System.Xml.Linq;
-
-namespace VerbNet.Core
+﻿namespace VerbNet.Core
 {
     public class Linear : Layer
     {
@@ -90,7 +88,7 @@ namespace VerbNet.Core
             bw.Write(_outputSize);
             bw = Weight.Write(bw);
             bw.Write(HasBias);
-            if(HasBias)
+            if (HasBias)
             {
                 bw = Bias.Write(bw);
             }
@@ -108,7 +106,7 @@ namespace VerbNet.Core
                 _outputSize = br.ReadInt32();
                 br = Weight.Read(br);
                 HasBias = br.ReadBoolean();
-                if(HasBias)
+                if (HasBias)
                 {
                     br = Bias.Read(br);
                 }

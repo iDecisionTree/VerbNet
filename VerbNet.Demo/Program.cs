@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics;
-using System.Net.Http.Headers;
 using VerbNet.Core;
 
 namespace VerbNet.Demo
@@ -8,7 +7,7 @@ namespace VerbNet.Demo
     {
         static void Main(string[] args)
         {
-            
+
             LayerList layers = new LayerList(
                 new Linear(64, 1024, true, 0.001f, "linear1"),
                 new Linear(1024, 1024, true, 0.0001f, "linear2"),

@@ -1,6 +1,4 @@
-﻿using System.Reflection.Metadata.Ecma335;
-
-namespace VerbNet.Core
+﻿namespace VerbNet.Core
 {
     public class LayerList
     {
@@ -67,7 +65,7 @@ namespace VerbNet.Core
                     for (int i = 0; i < Layers.Count; i++)
                     {
                         Layers[i].Write(bw);
-                    }    
+                    }
                 }
             }
         }
@@ -82,7 +80,7 @@ namespace VerbNet.Core
                     {
                         Layers[i].Read(br);
                     }
-                }   
+                }
             }
         }
     }

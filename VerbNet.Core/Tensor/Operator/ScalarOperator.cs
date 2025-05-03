@@ -1,6 +1,4 @@
-﻿using System.Reflection.Metadata.Ecma335;
-
-namespace VerbNet.Core
+﻿namespace VerbNet.Core
 {
     public static unsafe class ScalarOperator
     {

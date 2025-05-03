@@ -32,7 +32,7 @@ namespace VerbNet.Core
             }
 
             return result;
-        }    
+        }
 
         public static AlignedArray<float> Subtract(AlignedArray<float> a, AlignedArray<float> b)
         {

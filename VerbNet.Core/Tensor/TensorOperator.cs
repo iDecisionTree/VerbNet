@@ -39,7 +39,7 @@
             {
                 result.GradFn = GradFunction.AddGradFn;
                 result.LeftLeaf = a;
-                result.LeftLeaf.Father = result;    
+                result.LeftLeaf.Father = result;
             }
 
             return result;

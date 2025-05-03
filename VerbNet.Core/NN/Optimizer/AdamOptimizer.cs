@@ -15,7 +15,7 @@ namespace VerbNet.Core
             Beta1 = beta1;
             Beta2 = beta2;
             Epsilon = epsilon;
-            
+
             T = 0;
             M = new float[parameters.Length][];
             V = new float[parameters.Length][];

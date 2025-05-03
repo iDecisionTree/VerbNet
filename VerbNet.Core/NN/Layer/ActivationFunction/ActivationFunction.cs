@@ -1,7 +1,4 @@
-﻿
-using Microsoft.VisualBasic;
-
-namespace VerbNet.Core
+﻿namespace VerbNet.Core
 {
     public abstract class ActivationFunction : Layer
     {

@@ -1,6 +1,4 @@
-﻿using System.Runtime.ExceptionServices;
-using System.Runtime.InteropServices;
-using System.Xml.Linq;
+﻿using System.Runtime.InteropServices;
 
 namespace VerbNet.Core
 {
@@ -24,7 +22,7 @@ namespace VerbNet.Core
         public readonly static Tensor One = new Tensor([1f], [1], false);
 
         private static ParallelOptions _parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = 2 };
-        
+
         private bool disposed;
 
         public Tensor(int[] shape, bool requiresGrad = false, string name = "")
@@ -316,7 +314,7 @@ namespace VerbNet.Core
                 Data.Dispose();
                 Gradient?.Dispose();
 
-                disposed = true; 
+                disposed = true;
             }
         }
 
