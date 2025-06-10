@@ -15,7 +15,7 @@ namespace VerbNet.Demo
                 new Sigmoid()
                 );
             MSELoss mse = new MSELoss();
-            SGDOptimizer optim = new SGDOptimizer(layers.GetParameters(), 0.001f);
+            AdamOptimizer optim = new AdamOptimizer(layers.GetParameters(), 0.0001f);
 
             Tensor input = Tensor.Random([1, 16]);
             Tensor target = Tensor.Abs(Tensor.Random([1, 1]));

@@ -32,12 +32,12 @@ namespace VerbNet.Core
             for (int i = 0; i < Parameters.Length; i++)
             {
                 M[i] = Beta1 * M[i] + (1f - Beta1) * Parameters[i].Gradient;
-                V[i] = Beta2 * V[i] + (1f - Beta2) * Tensor.Pow(Parameters[i].Gradient, 2f);
+                V[i] = Beta2 * V[i] + (1f - Beta2) * TensorOperator.Power(Parameters[i].Gradient, 2f, false);
 
                 Tensor mHat = M[i] / (1f - MathF.Pow(Beta1, T));
                 Tensor vHat = V[i] / (1f - MathF.Pow(Beta2, T));
 
-                Tensor delta = LearningRate * mHat / (Tensor.Sqrt(vHat) + Epsilon);
+                Tensor delta = LearningRate * mHat / (TensorOperator.Sqrt(vHat, false) + Epsilon);
                 Parallel.For(0, Parameters[i].Length, j =>
                 {
                     Parameters[i].Data[j] -= delta.Data[j];
