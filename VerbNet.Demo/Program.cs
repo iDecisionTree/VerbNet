@@ -9,16 +9,16 @@ namespace VerbNet.Demo
         {
 
             LayerList layers = new LayerList(
-                new Linear(64, 1024, true, 0.001f, "linear1"),
+                new Linear(16, 1024, true, 0.001f, "linear1"),
                 new Linear(1024, 1024, true, 0.0001f, "linear2"),
                 new Linear(1024, 1, true, 0.001f, "linear3"),
                 new Sigmoid()
                 );
             MSELoss mse = new MSELoss();
-            AdamOptimizer optim = new AdamOptimizer(layers.GetParameters(), 0.0001f);
-            
-            Tensor input = Tensor.Random([4, 64]);
-            Tensor target = Tensor.Abs(Tensor.Random([4, 1]));
+            SGDOptimizer optim = new SGDOptimizer(layers.GetParameters(), 0.001f);
+
+            Tensor input = Tensor.Random([1, 16]);
+            Tensor target = Tensor.Abs(Tensor.Random([1, 1]));
 
             Stopwatch stopwatch = new Stopwatch();
 
@@ -50,9 +50,9 @@ namespace VerbNet.Demo
             Console.WriteLine($"Average Time: {avgTime}ms");
 
             Console.ReadLine();
-            
+
             layers.Save("TestModel.bin");
-            
+
             //layers.Load("TestModel.bin");
         }
     }

@@ -45,32 +45,6 @@ namespace VerbNet.Core
             });
         }
 
-        public static void Add(float* a, float b, float* result, int length)
-        {
-            Vector256<float> bVec = Vector256.Create(b);
-
-            Parallel.For(0, (length + BLOCK_SIZE - 1) / BLOCK_SIZE, _parallelOptions, chunkIndex =>
-            {
-                int start = chunkIndex * BLOCK_SIZE;
-                int end = Math.Min(start + BLOCK_SIZE, length);
-
-                int i = start;
-                int vectorizableLength = end - start;
-                int vectorizedEnd = start + (vectorizableLength / AVX_VECTOR_SIZE) * AVX_VECTOR_SIZE;
-
-                for (; i < vectorizedEnd; i += AVX_VECTOR_SIZE)
-                {
-                    Vector256<float> aVec = Avx.LoadAlignedVector256(a + i);
-                    Vector256<float> resultVec = Avx.Add(aVec, bVec);
-                    Avx.StoreAligned(result + i, resultVec);
-                }
-                for (; i < end; i++)
-                {
-                    result[i] = a[i] + b;
-                }
-            });
-        }
-
         public static void Subtract(float* a, float* b, float* result, int length)
         {
             Parallel.For(0, (length + BLOCK_SIZE - 1) / BLOCK_SIZE, _parallelOptions, chunkIndex =>
@@ -92,58 +66,6 @@ namespace VerbNet.Core
                 for (; i < end; i++)
                 {
                     result[i] = a[i] - b[i];
-                }
-            });
-        }
-
-        public static void Subtract(float* a, float b, float* result, int length)
-        {
-            Vector256<float> bVec = Vector256.Create(b);
-
-            Parallel.For(0, (length + BLOCK_SIZE - 1) / BLOCK_SIZE, _parallelOptions, chunkIndex =>
-            {
-                int start = chunkIndex * BLOCK_SIZE;
-                int end = Math.Min(start + BLOCK_SIZE, length);
-
-                int i = start;
-                int vectorizableLength = end - start;
-                int vectorizedEnd = start + (vectorizableLength / AVX_VECTOR_SIZE) * AVX_VECTOR_SIZE;
-
-                for (; i < vectorizedEnd; i += AVX_VECTOR_SIZE)
-                {
-                    Vector256<float> aVec = Avx.LoadAlignedVector256(a + i);
-                    Vector256<float> resultVec = Avx.Subtract(aVec, bVec);
-                    Avx.StoreAligned(result + i, resultVec);
-                }
-                for (; i < end; i++)
-                {
-                    result[i] = a[i] - b;
-                }
-            });
-        }
-
-        public static void Subtract(float a, float* b, float* result, int length)
-        {
-            Vector256<float> aVec = Vector256.Create(a);
-
-            Parallel.For(0, (length + BLOCK_SIZE - 1) / BLOCK_SIZE, _parallelOptions, chunkIndex =>
-            {
-                int start = chunkIndex * BLOCK_SIZE;
-                int end = Math.Min(start + BLOCK_SIZE, length);
-
-                int i = start;
-                int vectorizableLength = end - start;
-                int vectorizedEnd = start + (vectorizableLength / AVX_VECTOR_SIZE) * AVX_VECTOR_SIZE;
-
-                for (; i < vectorizedEnd; i += AVX_VECTOR_SIZE)
-                {
-                    Vector256<float> bVec = Avx.LoadAlignedVector256(b + i);
-                    Vector256<float> resultVec = Avx.Subtract(aVec, bVec);
-                    Avx.StoreAligned(result + i, resultVec);
-                }
-                for (; i < end; i++)
-                {
-                    result[i] = a - b[i];
                 }
             });
         }
@@ -173,32 +95,6 @@ namespace VerbNet.Core
             });
         }
 
-        public static void Multiply(float* a, float b, float* result, int length)
-        {
-            Vector256<float> bVec = Vector256.Create(b);
-
-            Parallel.For(0, (length + BLOCK_SIZE - 1) / BLOCK_SIZE, _parallelOptions, chunkIndex =>
-            {
-                int start = chunkIndex * BLOCK_SIZE;
-                int end = Math.Min(start + BLOCK_SIZE, length);
-
-                int i = start;
-                int vectorizableLength = end - start;
-                int vectorizedEnd = start + (vectorizableLength / AVX_VECTOR_SIZE) * AVX_VECTOR_SIZE;
-
-                for (; i < vectorizedEnd; i += AVX_VECTOR_SIZE)
-                {
-                    Vector256<float> aVec = Avx.LoadAlignedVector256(a + i);
-                    Vector256<float> resultVec = Avx.Multiply(aVec, bVec);
-                    Avx.StoreAligned(result + i, resultVec);
-                }
-                for (; i < end; i++)
-                {
-                    result[i] = a[i] * b;
-                }
-            });
-        }
-
         public static void Divide(float* a, float* b, float* result, int length)
         {
             Parallel.For(0, (length + BLOCK_SIZE - 1) / BLOCK_SIZE, _parallelOptions, chunkIndex =>
@@ -220,58 +116,6 @@ namespace VerbNet.Core
                 for (; i < end; i++)
                 {
                     result[i] = a[i] / b[i];
-                }
-            });
-        }
-
-        public static void Divide(float* a, float b, float* result, int length)
-        {
-            Vector256<float> bVec = Vector256.Create(b);
-
-            Parallel.For(0, (length + BLOCK_SIZE - 1) / BLOCK_SIZE, _parallelOptions, chunkIndex =>
-            {
-                int start = chunkIndex * BLOCK_SIZE;
-                int end = Math.Min(start + BLOCK_SIZE, length);
-
-                int i = start;
-                int vectorizableLength = end - start;
-                int vectorizedEnd = start + (vectorizableLength / AVX_VECTOR_SIZE) * AVX_VECTOR_SIZE;
-
-                for (; i < vectorizedEnd; i += AVX_VECTOR_SIZE)
-                {
-                    Vector256<float> aVec = Avx.LoadAlignedVector256(a + i);
-                    Vector256<float> resultVec = Avx.Divide(aVec, bVec);
-                    Avx.StoreAligned(result + i, resultVec);
-                }
-                for (; i < end; i++)
-                {
-                    result[i] = a[i] / b;
-                }
-            });
-        }
-
-        public static void Divide(float a, float* b, float* result, int length)
-        {
-            Vector256<float> aVec = Vector256.Create(a);
-
-            Parallel.For(0, (length + BLOCK_SIZE - 1) / BLOCK_SIZE, _parallelOptions, chunkIndex =>
-            {
-                int start = chunkIndex * BLOCK_SIZE;
-                int end = Math.Min(start + BLOCK_SIZE, length);
-
-                int i = start;
-                int vectorizableLength = end - start;
-                int vectorizedEnd = start + (vectorizableLength / AVX_VECTOR_SIZE) * AVX_VECTOR_SIZE;
-
-                for (; i < vectorizedEnd; i += AVX_VECTOR_SIZE)
-                {
-                    Vector256<float> bVec = Avx.LoadAlignedVector256(b + i);
-                    Vector256<float> resultVec = Avx.Divide(aVec, bVec);
-                    Avx.StoreAligned(result + i, resultVec);
-                }
-                for (; i < end; i++)
-                {
-                    result[i] = a / b[i];
                 }
             });
         }

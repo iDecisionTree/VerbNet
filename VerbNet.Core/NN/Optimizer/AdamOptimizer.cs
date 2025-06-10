@@ -38,10 +38,10 @@ namespace VerbNet.Core
                 Tensor vHat = V[i] / (1f - MathF.Pow(Beta2, T));
 
                 Tensor delta = LearningRate * mHat / (Tensor.Sqrt(vHat) + Epsilon);
-                for (int j = 0; j < Parameters[i].Length; j++)
+                Parallel.For(0, Parameters[i].Length, j =>
                 {
                     Parameters[i].Data[j] -= delta.Data[j];
-                }
+                });
             }
         }
 

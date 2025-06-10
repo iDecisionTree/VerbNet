@@ -10,35 +10,11 @@
             }
         }
 
-        public static void Add(float* a, float b, float* result, int length)
-        {
-            for (int i = 0; i < length; i++)
-            {
-                result[i] = a[i] + b;
-            }
-        }
-
         public static void Subtract(float* a, float* b, float* result, int length)
         {
             for (int i = 0; i < length; i++)
             {
                 result[i] = a[i] - b[i];
-            }
-        }
-
-        public static void Subtract(float* a, float b, float* result, int length)
-        {
-            for (int i = 0; i < length; i++)
-            {
-                result[i] = a[i] - b;
-            }
-        }
-
-        public static void Subtract(float a, float* b, float* result, int length)
-        {
-            for (int i = 0; i < length; i++)
-            {
-                result[i] = a - b[i];
             }
         }
 
@@ -50,35 +26,11 @@
             }
         }
 
-        public static void Multiply(float* a, float b, float* result, int length)
-        {
-            for (int i = 0; i < length; i++)
-            {
-                result[i] = a[i] * b;
-            }
-        }
-
         public static void Divide(float* a, float* b, float* result, int length)
         {
             for (int i = 0; i < length; i++)
             {
                 result[i] = a[i] / b[i];
-            }
-        }
-
-        public static void Divide(float* a, float b, float* result, int length)
-        {
-            for (int i = 0; i < length; i++)
-            {
-                result[i] = a[i] / b;
-            }
-        }
-
-        public static void Divide(float a, float* b, float* result, int length)
-        {
-            for (int i = 0; i < length; i++)
-            {
-                result[i] = a / b[i];
             }
         }
 

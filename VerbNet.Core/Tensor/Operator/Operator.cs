@@ -19,21 +19,6 @@ namespace VerbNet.Core
             return result;
         }
 
-        public static AlignedArray<float> Add(AlignedArray<float> a, float b)
-        {
-            AlignedArray<float> result = new AlignedArray<float>(a.Length, a.Alignment);
-            if (Avx.IsSupported)
-            {
-                SimdOperator.Add(a.Ptr, b, result.Ptr, a.Length);
-            }
-            else
-            {
-                ScalarOperator.Add(a.Ptr, b, result.Ptr, a.Length);
-            }
-
-            return result;
-        }
-
         public static AlignedArray<float> Subtract(AlignedArray<float> a, AlignedArray<float> b)
         {
             AlignedArray<float> result = new AlignedArray<float>(a.Length, a.Alignment);
@@ -44,36 +29,6 @@ namespace VerbNet.Core
             else
             {
                 ScalarOperator.Subtract(a.Ptr, b.Ptr, result.Ptr, a.Length);
-            }
-
-            return result;
-        }
-
-        public static AlignedArray<float> Subtract(AlignedArray<float> a, float b)
-        {
-            AlignedArray<float> result = new AlignedArray<float>(a.Length, a.Alignment);
-            if (Avx.IsSupported)
-            {
-                SimdOperator.Subtract(a.Ptr, b, result.Ptr, a.Length);
-            }
-            else
-            {
-                ScalarOperator.Subtract(a.Ptr, b, result.Ptr, a.Length);
-            }
-
-            return result;
-        }
-
-        public static AlignedArray<float> Subtract(float a, AlignedArray<float> b)
-        {
-            AlignedArray<float> result = new AlignedArray<float>(b.Length, b.Alignment);
-            if (Avx.IsSupported)
-            {
-                SimdOperator.Subtract(a, b.Ptr, result.Ptr, b.Length);
-            }
-            else
-            {
-                ScalarOperator.Subtract(a, b.Ptr, result.Ptr, b.Length);
             }
 
             return result;
@@ -94,21 +49,6 @@ namespace VerbNet.Core
             return result;
         }
 
-        public static AlignedArray<float> Multiply(AlignedArray<float> a, float b)
-        {
-            AlignedArray<float> result = new AlignedArray<float>(a.Length, a.Alignment);
-            if (Avx.IsSupported)
-            {
-                SimdOperator.Multiply(a.Ptr, b, result.Ptr, a.Length);
-            }
-            else
-            {
-                ScalarOperator.Multiply(a.Ptr, b, result.Ptr, a.Length);
-            }
-
-            return result;
-        }
-
         public static AlignedArray<float> Divide(AlignedArray<float> a, AlignedArray<float> b)
         {
             AlignedArray<float> result = new AlignedArray<float>(a.Length, a.Alignment);
@@ -119,36 +59,6 @@ namespace VerbNet.Core
             else
             {
                 ScalarOperator.Divide(a.Ptr, b.Ptr, result.Ptr, a.Length);
-            }
-
-            return result;
-        }
-
-        public static AlignedArray<float> Divide(AlignedArray<float> a, float b)
-        {
-            AlignedArray<float> result = new AlignedArray<float>(a.Length, a.Alignment);
-            if (Avx.IsSupported)
-            {
-                SimdOperator.Divide(a.Ptr, b, result.Ptr, a.Length);
-            }
-            else
-            {
-                ScalarOperator.Divide(a.Ptr, b, result.Ptr, a.Length);
-            }
-
-            return result;
-        }
-
-        public static AlignedArray<float> Divide(float a, AlignedArray<float> b)
-        {
-            AlignedArray<float> result = new AlignedArray<float>(b.Length, b.Alignment);
-            if (Avx.IsSupported)
-            {
-                SimdOperator.Divide(a, b.Ptr, result.Ptr, b.Length);
-            }
-            else
-            {
-                ScalarOperator.Divide(a, b.Ptr, result.Ptr, b.Length);
             }
 
             return result;

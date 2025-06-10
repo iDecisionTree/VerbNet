@@ -11,10 +11,11 @@ namespace VerbNet.Core
         {
             for (int i = 0; i < Parameters.Length; i++)
             {
-                for (int j = 0; j < Parameters[i].Length; j++)
+                Tensor delta = LearningRate * Parameters[i].Gradient;
+                Parallel.For(0, Parameters[i].Length, j =>
                 {
-                    Parameters[i].Data[j] -= LearningRate * Parameters[i].Gradient.Data[j];
-                }
+                    Parameters[i].Data[j] -= delta.Data[j];
+                });
             }
         }
 
