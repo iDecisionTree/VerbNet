@@ -9,7 +9,7 @@
 
         public static (Tensor, Tensor) SubGradFn(Tensor gradient, Tensor leftLeaf, Tensor rightLeaf, Dictionary<string, object> opArgs)
         {
-            Tensor rightGrad = TensorOperator.Negate(gradient, false);
+            Tensor rightGrad = TensorOperator.Negate(gradient, false, false);
 
             return (gradient, rightGrad);
         }
@@ -25,7 +25,7 @@
         public static (Tensor, Tensor) DivGradFn(Tensor gradient, Tensor leftLeaf, Tensor rightLeaf, Dictionary<string, object> opArgs)
         {
             Tensor rightSquared = TensorOperator.Multiply(rightLeaf, rightLeaf, false, false);
-            Tensor negLeft = TensorOperator.Negate(leftLeaf, false);
+            Tensor negLeft = TensorOperator.Negate(leftLeaf, false, false);
             Tensor temp = TensorOperator.Multiply(negLeft, gradient, false, false);
 
             Tensor leftGrad = TensorOperator.Divide(gradient, rightLeaf, false, false);
@@ -43,7 +43,7 @@
 
         public static (Tensor, Tensor) AbsGradFn(Tensor gradient, Tensor leftLeaf, Tensor rightLeaf, Dictionary<string, object> opArgs)
         {
-            Tensor sign = TensorOperator.Sign(leftLeaf);
+            Tensor sign = TensorOperator.Sign(leftLeaf, false, false);
             Tensor leftGrad = TensorOperator.Multiply(gradient, sign, false, false);
 
             return (leftGrad, null);
@@ -73,7 +73,7 @@
 
         public static (Tensor, Tensor) ExpGradFn(Tensor gradient, Tensor leftLeaf, Tensor rightLeaf, Dictionary<string, object> opArgs)
         {
-            Tensor expX = TensorOperator.Exp(leftLeaf, false);
+            Tensor expX = TensorOperator.Exp(leftLeaf, false, false);
             Tensor grad = TensorOperator.Multiply(gradient, expX, false, false);
 
             return (grad, null);
@@ -83,7 +83,7 @@
         {
             float exponent = (float)opArgs["Power_exponent"];
 
-            Tensor leftPower = TensorOperator.Power(leftLeaf, exponent - 1f, false);
+            Tensor leftPower = TensorOperator.Power(leftLeaf, exponent - 1f, false, false);
             Tensor leftGrad = TensorOperator.Multiply(gradient, TensorOperator.Multiply(Tensor.Create(exponent, false), leftPower, false, false), false, false);
 
             return (leftGrad, null);
@@ -91,7 +91,7 @@
 
         public static (Tensor, Tensor) SinGradFn(Tensor gradient, Tensor leftLeaf, Tensor rightLeaf, Dictionary<string, object> opArgs)
         {
-            Tensor cosX = TensorOperator.Cos(leftLeaf, false);
+            Tensor cosX = TensorOperator.Cos(leftLeaf, false, false);
             Tensor grad = TensorOperator.Multiply(gradient, cosX, false, false);
 
             return (grad, null);
@@ -99,8 +99,8 @@
 
         public static (Tensor, Tensor) CosGradFn(Tensor gradient, Tensor leftLeaf, Tensor rightLeaf, Dictionary<string, object> opArgs)
         {
-            Tensor sinX = TensorOperator.Sin(leftLeaf, false);
-            Tensor negSinX = TensorOperator.Negate(sinX, false);
+            Tensor sinX = TensorOperator.Sin(leftLeaf, false, false);
+            Tensor negSinX = TensorOperator.Negate(sinX, false, false);
             Tensor grad = TensorOperator.Multiply(gradient, negSinX, false, false);
 
             return (grad, null);
@@ -108,7 +108,7 @@
 
         public static (Tensor, Tensor) TanGradFn(Tensor gradient, Tensor leftLeaf, Tensor rightLeaf, Dictionary<string, object> opArgs)
         {
-            Tensor cosX = TensorOperator.Cos(leftLeaf, false);
+            Tensor cosX = TensorOperator.Cos(leftLeaf, false, false);
             Tensor cosSquared = TensorOperator.Multiply(cosX, cosX, false, false);
             Tensor invSecSquared = TensorOperator.Divide(Tensor.One, cosSquared, false, false);
             Tensor grad = TensorOperator.Multiply(gradient, invSecSquared, false, false);
@@ -118,7 +118,7 @@
 
         public static (Tensor, Tensor) SinhGradFn(Tensor gradient, Tensor leftLeaf, Tensor rightLeaf, Dictionary<string, object> opArgs)
         {
-            Tensor coshX = TensorOperator.Cosh(leftLeaf, false);
+            Tensor coshX = TensorOperator.Cosh(leftLeaf, false, false);
             Tensor grad = TensorOperator.Multiply(gradient, coshX, false, false);
 
             return (grad, null);
@@ -126,7 +126,7 @@
 
         public static (Tensor, Tensor) CoshGradFn(Tensor gradient, Tensor leftLeaf, Tensor rightLeaf, Dictionary<string, object> opArgs)
         {
-            Tensor sinhX = TensorOperator.Sinh(leftLeaf, false);
+            Tensor sinhX = TensorOperator.Sinh(leftLeaf, false, false);
             Tensor grad = TensorOperator.Multiply(gradient, sinhX, false, false);
 
             return (grad, null);
@@ -134,7 +134,7 @@
 
         public static (Tensor, Tensor) TanhGradFn(Tensor gradient, Tensor leftLeaf, Tensor rightLeaf, Dictionary<string, object> opArgs)
         {
-            Tensor tanhX = TensorOperator.Tanh(leftLeaf, false);
+            Tensor tanhX = TensorOperator.Tanh(leftLeaf, false, false);
             Tensor tanhSquared = TensorOperator.Multiply(tanhX, tanhX, false, false);
             Tensor oneMinusTanhSquared = TensorOperator.Subtract(Tensor.One, tanhSquared, false, false);
             Tensor grad = TensorOperator.Multiply(gradient, oneMinusTanhSquared, false, false);
@@ -144,18 +144,18 @@
 
         public static (Tensor, Tensor) MatMulGradFn(Tensor gradient, Tensor leftLeaf, Tensor rightLeaf, Dictionary<string, object> opArgs)
         {
-            Tensor bTransposed = TensorOperator.Transpose(rightLeaf, false);
-            Tensor dA = TensorOperator.MatMul(gradient, bTransposed, false);
+            Tensor bTransposed = TensorOperator.Transpose(rightLeaf, false, false);
+            Tensor dA = TensorOperator.MatMul(gradient, bTransposed, false, false);
 
-            Tensor aTransposed = TensorOperator.Transpose(leftLeaf, false);
-            Tensor dB = TensorOperator.MatMul(aTransposed, gradient, false);
+            Tensor aTransposed = TensorOperator.Transpose(leftLeaf, false, false);
+            Tensor dB = TensorOperator.MatMul(aTransposed, gradient, false, false);
 
             return (dA, dB);
         }
 
         public static (Tensor, Tensor) TransposeGradFn(Tensor gradient, Tensor leftLeaf, Tensor rightLeaf, Dictionary<string, object> opArgs)
         {
-            Tensor grad = TensorOperator.Transpose(gradient, false);
+            Tensor grad = TensorOperator.Transpose(gradient, false, false);
 
             return (grad, null);
         }
@@ -225,7 +225,7 @@
         public static (Tensor, Tensor) BroadcastGradFn(Tensor gradient, Tensor leftLeaf, Tensor rightLeaf, Dictionary<string, object> opArgs)
         {
             int[] originalShape = (int[])opArgs["OriginalShape"];
-            Tensor grad = TensorOperator.Reshape(gradient, originalShape, false);
+            Tensor grad = TensorOperator.Reshape(gradient, originalShape, false, false);
 
             return (grad, null);
         }

@@ -18,8 +18,8 @@ namespace VerbNet.Core
         public Tensor LeftLeaf;
         public Tensor RightLeaf;
 
-        public readonly static Tensor Zero = Tensor.Create(1f, false, "One");
-        public readonly static Tensor One = Tensor.Create(0f, false, "Zero");
+        public readonly static Tensor Zero = Tensor.Create(0f, false, "Zero");
+        public readonly static Tensor One = Tensor.Create(1f, false, "One");
 
         private static ParallelOptions _parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = 2 };
 
@@ -189,25 +189,25 @@ namespace VerbNet.Core
         public static Tensor operator /(Tensor a, Tensor b) => TensorOperator.Divide(a, b, true, true);
         public static Tensor operator /(Tensor a, float b) => TensorOperator.Divide(a, b);
         public static Tensor operator /(float a, Tensor b) => TensorOperator.Divide(a, b);
-        public static Tensor operator -(Tensor a) => TensorOperator.Negate(a, true);
+        public static Tensor operator -(Tensor a) => TensorOperator.Negate(a, true, true);
 
-        public Tensor Repeat(int axis, int repeat = 2) => TensorOperator.Repeat(this, axis, repeat, true);
-        public Tensor Reshape(int[] shape) => TensorOperator.Reshape(this, shape, true);
+        public Tensor Repeat(int axis, int repeat = 2) => TensorOperator.Repeat(this, axis, repeat, true, true);
+        public Tensor Reshape(int[] shape) => TensorOperator.Reshape(this, shape, true, true);
 
-        public static Tensor Abs(Tensor a) => TensorOperator.Abs(a, true);
-        public static Tensor Sign(Tensor a) => TensorOperator.Sign(a, true);
-        public static Tensor Sqrt(Tensor a) => TensorOperator.Sqrt(a, true);
-        public static Tensor Log(Tensor a) => TensorOperator.LogE(a, true);
-        public static Tensor Exp(Tensor a) => TensorOperator.Exp(a, true);
-        public static Tensor Pow(Tensor a, float b) => TensorOperator.Power(a, b, true);
-        public static Tensor Sin(Tensor a) => TensorOperator.Sin(a, true);
-        public static Tensor Cos(Tensor a) => TensorOperator.Cos(a, true);
-        public static Tensor Tan(Tensor a) => TensorOperator.Tan(a, true);
-        public static Tensor Sinh(Tensor a) => TensorOperator.Sinh(a, true);
-        public static Tensor Cosh(Tensor a) => TensorOperator.Cosh(a, true);
-        public static Tensor Tanh(Tensor a) => TensorOperator.Tanh(a, true);
-        public static Tensor Transpose(Tensor a) => TensorOperator.Transpose(a, true);
-        public static Tensor MatMul(Tensor a, Tensor b) => TensorOperator.MatMul(a, b, true);
+        public static Tensor Abs(Tensor a) => TensorOperator.Abs(a, true, true);
+        public static Tensor Sign(Tensor a) => TensorOperator.Sign(a, true, true);
+        public static Tensor Sqrt(Tensor a) => TensorOperator.Sqrt(a, true, true);
+        public static Tensor Log(Tensor a) => TensorOperator.LogE(a, true, true);
+        public static Tensor Exp(Tensor a) => TensorOperator.Exp(a, true, true);
+        public static Tensor Pow(Tensor a, float b) => TensorOperator.Power(a, b, true, true);
+        public static Tensor Sin(Tensor a) => TensorOperator.Sin(a, true, true);
+        public static Tensor Cos(Tensor a) => TensorOperator.Cos(a, true, true);
+        public static Tensor Tan(Tensor a) => TensorOperator.Tan(a, true, true);
+        public static Tensor Sinh(Tensor a) => TensorOperator.Sinh(a, true, true);
+        public static Tensor Cosh(Tensor a) => TensorOperator.Cosh(a, true, true);
+        public static Tensor Tanh(Tensor a) => TensorOperator.Tanh(a, true, true);
+        public static Tensor Transpose(Tensor a) => TensorOperator.Transpose(a, true, true);
+        public static Tensor MatMul(Tensor a, Tensor b) => TensorOperator.MatMul(a, b, true, true);
 
         public static Tensor Random(int[] shape, float scale = 1f, bool requiresGrad = false, string name = "") => TensorOperator.Random(shape, scale, requiresGrad, name);
 

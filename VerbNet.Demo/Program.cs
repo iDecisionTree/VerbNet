@@ -22,7 +22,7 @@ namespace VerbNet.Demo
 
             Stopwatch stopwatch = new Stopwatch();
 
-            float[] times = new float[200];
+            float[] times = new float[2000];
             for (int i = 0; i < times.Length; i++)
             {
                 optim.ZeroGrad();

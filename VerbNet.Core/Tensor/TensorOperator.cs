@@ -12,7 +12,7 @@ namespace VerbNet.Core
                 throw new ArgumentNullException(nameof(b));
 
             Tensor aBroadcast, bBroadcast;
-            (aBroadcast, bBroadcast) = Broadcast(a, b, false);
+            (aBroadcast, bBroadcast) = Broadcast(a, b, false, false);
 
             bool requiresGrad = computeGrad && (a.RequiresGrad || b.RequiresGrad);
             Tensor result = new Tensor(Operator.Add(aBroadcast.Data, bBroadcast.Data), aBroadcast.Shape, requiresGrad);
@@ -62,7 +62,7 @@ namespace VerbNet.Core
                 throw new ArgumentNullException(nameof(b));
 
             Tensor aBroadcast, bBroadcast;
-            (aBroadcast, bBroadcast) = Broadcast(a, b, false);
+            (aBroadcast, bBroadcast) = Broadcast(a, b, false, false);
 
             bool requiresGrad = computeGrad && (a.RequiresGrad || b.RequiresGrad);
             Tensor result = new Tensor(Operator.Subtract(aBroadcast.Data, bBroadcast.Data), aBroadcast.Shape, requiresGrad);
@@ -119,7 +119,7 @@ namespace VerbNet.Core
                 throw new ArgumentNullException(nameof(b));
 
             Tensor aBroadcast, bBroadcast;
-            (aBroadcast, bBroadcast) = Broadcast(a, b, false);
+            (aBroadcast, bBroadcast) = Broadcast(a, b, false, false);
 
             bool requiresGrad = computeGrad && (a.RequiresGrad || b.RequiresGrad);
             Tensor result = new Tensor(Operator.Multiply(aBroadcast.Data, bBroadcast.Data), aBroadcast.Shape, requiresGrad);
@@ -169,7 +169,7 @@ namespace VerbNet.Core
                 throw new ArgumentNullException(nameof(b));
 
             Tensor aBroadcast, bBroadcast;
-            (aBroadcast, bBroadcast) = Broadcast(a, b, false);
+            (aBroadcast, bBroadcast) = Broadcast(a, b, false, false);
 
             bool requiresGrad = computeGrad && (a.RequiresGrad || b.RequiresGrad);
             Tensor result = new Tensor(Operator.Divide(aBroadcast.Data, bBroadcast.Data), aBroadcast.Shape, requiresGrad);
@@ -453,7 +453,7 @@ namespace VerbNet.Core
             if (a == null)
                 throw new ArgumentNullException(nameof(a));
 
-            bool requiresGrad = buildGraph && a.RequiresGrad;
+            bool requiresGrad = computeGrad && a.RequiresGrad;
             Tensor result = new Tensor(Operator.Sinh(a.Data), a.Shape, requiresGrad);
 
             if (buildGraph)
@@ -461,6 +461,10 @@ namespace VerbNet.Core
                 result.GradFn = GradFunction.SinhGradFn;
                 result.LeftLeaf = a;
                 result.LeftLeaf.Father = result;
+            }
+            else if (requiresGrad && computeGrad)
+            {
+                result.Gradient = Cosh(a.Gradient, false, false);
             }
 
             return result;
@@ -471,7 +475,7 @@ namespace VerbNet.Core
             if (a == null)
                 throw new ArgumentNullException(nameof(a));
 
-            bool requiresGrad = buildGraph && a.RequiresGrad;
+            bool requiresGrad = computeGrad && a.RequiresGrad;
             Tensor result = new Tensor(Operator.Cosh(a.Data), a.Shape, requiresGrad);
 
             if (buildGraph)
@@ -479,6 +483,10 @@ namespace VerbNet.Core
                 result.GradFn = GradFunction.CoshGradFn;
                 result.LeftLeaf = a;
                 result.LeftLeaf.Father = result;
+            }
+            else if (requiresGrad && computeGrad)
+            {
+                result.Gradient = Sinh(a.Gradient, false, false);
             }
 
             return result;
@@ -489,7 +497,7 @@ namespace VerbNet.Core
             if (a == null)
                 throw new ArgumentNullException(nameof(a));
 
-            bool requiresGrad = buildGraph && a.RequiresGrad;
+            bool requiresGrad = computeGrad && a.RequiresGrad;
             Tensor result = new Tensor(Operator.Tanh(a.Data), a.Shape, requiresGrad);
 
             if (buildGraph)
@@ -497,6 +505,12 @@ namespace VerbNet.Core
                 result.GradFn = GradFunction.TanhGradFn;
                 result.LeftLeaf = a;
                 result.LeftLeaf.Father = result;
+            }
+            else if (requiresGrad && computeGrad)
+            {
+                Tensor tanhX = Tanh(a.Gradient, false, false);
+                Tensor tanhSquared = Multiply(tanhX, tanhX, false, false);
+                result.Gradient = Subtract(Tensor.One, tanhSquared, false, false);
             }
 
             return result;
@@ -520,7 +534,7 @@ namespace VerbNet.Core
             int bRows = b.Shape[0];
             int bCols = b.Shape[1];
 
-            bool requiresGrad = buildGraph && (a.RequiresGrad || b.RequiresGrad);
+            bool requiresGrad = computeGrad && (a.RequiresGrad || b.RequiresGrad);
             Tensor result = new Tensor(Operator.MatMul(a.Data, b.Data, aRows, aCols, bRows, bCols), [aRows, bCols], requiresGrad);
 
             if (buildGraph)
@@ -530,6 +544,24 @@ namespace VerbNet.Core
                 result.RightLeaf = b;
                 result.LeftLeaf.Father = result;
                 result.RightLeaf.Father = result;
+            }
+            else if(requiresGrad && computeGrad)
+            {
+                if (a.RequiresGrad && b.RequiresGrad)
+                {
+                    result.Gradient = MatMul(a.Gradient, b.Gradient, false, false);
+                }
+                else
+                {
+                    if (a.RequiresGrad)
+                    {
+                        result.Gradient = a.Gradient.Clone();
+                    }
+                    else if (b.RequiresGrad)
+                    {
+                        result.Gradient = b.Gradient.Clone();
+                    }
+                }
             }
 
             return result;
@@ -543,7 +575,7 @@ namespace VerbNet.Core
             int rows = a.Shape[0];
             int cols = a.Shape[1];
 
-            bool requiresGrad = a.RequiresGrad;
+            bool requiresGrad = computeGrad && a.RequiresGrad;
             Tensor result = new Tensor(Operator.Transpose(a.Data, rows, cols), [cols, rows], requiresGrad);
 
             if (buildGraph)
@@ -551,6 +583,10 @@ namespace VerbNet.Core
                 result.GradFn = GradFunction.TransposeGradFn;
                 result.LeftLeaf = a;
                 result.LeftLeaf.Father = result;
+            }
+            else if (requiresGrad && computeGrad)
+            {
+                result.Gradient = Transpose(a.Gradient, false, false);
             }
 
             return result;
@@ -571,7 +607,7 @@ namespace VerbNet.Core
 
             if (repeat == 1)
             {
-                result = Reshape(a, newShape, false);
+                result = Reshape(a, newShape, false, false);
 
                 if (buildGraph)
                 {
@@ -628,7 +664,7 @@ namespace VerbNet.Core
                 }
             });
 
-            bool requiresGrad = a.RequiresGrad;
+            bool requiresGrad = computeGrad && a.RequiresGrad;
             result = new Tensor(newData, newShape, requiresGrad);
 
             if (buildGraph)
@@ -638,6 +674,10 @@ namespace VerbNet.Core
                 result.OpArgs.Add("Repeat_repeat", repeat);
                 result.LeftLeaf = a;
                 result.LeftLeaf.Father = result;
+            }
+            else if (requiresGrad && computeGrad)
+            {
+                result.Gradient = Repeat(a.Gradient, axis, repeat, false, false);
             }
 
             return result;
@@ -651,7 +691,7 @@ namespace VerbNet.Core
             if (length != newLength)
                 throw new ArgumentException($"Cannot reshape tensor from [{string.Join(", ", a.Shape)}] to [{string.Join(", ", newShape)}]");
 
-            bool requiresGrad = a.RequiresGrad;
+            bool requiresGrad = computeGrad && a.RequiresGrad;
             Tensor result = new Tensor(a.Data, newShape, requiresGrad);
 
             if (buildGraph)
@@ -659,6 +699,10 @@ namespace VerbNet.Core
                 result.GradFn = GradFunction.ReshapeGradFn;
                 result.LeftLeaf = a;
                 result.LeftLeaf.Father = result;
+            }
+            else if (requiresGrad && computeGrad)
+            {
+                result.Gradient = Reshape(a.Gradient, newShape, false, false);
             }
 
             return result;
@@ -783,7 +827,7 @@ namespace VerbNet.Core
                 broadcastData[linearIndex] = tensor.Data[originalIndex];
             });
 
-            bool requiresGrad = tensor.RequiresGrad;
+            bool requiresGrad = computeGrad && tensor.RequiresGrad;
             Tensor result = new Tensor(broadcastData, targetShape, requiresGrad);
 
             if (buildGraph)
@@ -793,6 +837,10 @@ namespace VerbNet.Core
                 result.OpArgs["Broadcast_originalShape"] = tensor.Shape;
                 result.LeftLeaf = tensor;
                 result.LeftLeaf.Father = result;
+            }
+            else if (requiresGrad && computeGrad)
+            {
+                result.Gradient = BroadcastTo(tensor.Gradient, targetShape, false, false);
             }
 
             return result;
