@@ -138,6 +138,46 @@
             }
         }
 
+        public static void Max(float* a, float* b, float* result, int length)
+        {
+            for (int i = 0; i < length; i++)
+            {
+                result[i] = MathF.Max(a[i], b[i]);
+            }
+        }
+
+        public static void Min(float* a, float* b, float* result, int length)
+        {
+            for (int i = 0; i < length; i++)
+            {
+                result[i] = MathF.Min(a[i], b[i]);
+            }
+        }
+
+        public static void Floor(float* a, float* result, int length)
+        {
+            for (int i = 0; i < length; i++)
+            {
+                result[i] = MathF.Floor(a[i]);
+            }
+        }
+
+        public static void Ceiling(float* a, float* result, int length)
+        {
+            for (int i = 0; i < length; i++)
+            {
+                result[i] = MathF.Ceiling(a[i]);
+            }
+        }
+
+        public static void Round(float* a, float* result, int length)
+        {
+            for (int i = 0; i < length; i++)
+            {
+                result[i] = MathF.Round(a[i]);
+            }
+        }
+
         public static void MatMul(float* a, float* b, float* result, int aRows, int aCols, int bCols)
         {
             Parallel.For(0, aRows, i =>

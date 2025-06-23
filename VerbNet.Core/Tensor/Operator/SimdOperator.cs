@@ -224,30 +224,124 @@ namespace VerbNet.Core
             });
         }
 
-        public static void LogE(float* a, float* result, int length)
+        public static void Max(float* a, float* b, float* result, int length)
         {
             Parallel.For(0, (length + BLOCK_SIZE - 1) / BLOCK_SIZE, _parallelOptions, chunkIndex =>
             {
                 int start = chunkIndex * BLOCK_SIZE;
                 int end = Math.Min(start + BLOCK_SIZE, length);
 
-                for (int i = start; i < end; i++)
+                int i = start;
+                int vectorizableLength = end - start;
+                int vectorizedEnd = start + (vectorizableLength / AVX_VECTOR_SIZE) * AVX_VECTOR_SIZE;
+
+                for (; i < vectorizedEnd; i += AVX_VECTOR_SIZE)
                 {
-                    result[i] = MathF.Log(a[i]);
+                    Vector256<float> aVec = Avx.LoadAlignedVector256(a + i);
+                    Vector256<float> bVec = Avx.LoadAlignedVector256(b + i);
+                    Vector256<float> resultVec = Avx.Max(aVec, bVec);
+                    Avx.StoreAligned(result + i, resultVec);
+                }
+                for (; i < end; i++)
+                {
+                    result[i] = MathF.Max(a[i], b[i]);
                 }
             });
         }
 
-        public static void Exp(float* a, float* result, int length)
+        public static void Min(float* a, float* b, float* result, int length)
         {
             Parallel.For(0, (length + BLOCK_SIZE - 1) / BLOCK_SIZE, _parallelOptions, chunkIndex =>
             {
                 int start = chunkIndex * BLOCK_SIZE;
                 int end = Math.Min(start + BLOCK_SIZE, length);
 
-                for (int i = start; i < end; i++)
+                int i = start;
+                int vectorizableLength = end - start;
+                int vectorizedEnd = start + (vectorizableLength / AVX_VECTOR_SIZE) * AVX_VECTOR_SIZE;
+
+                for (; i < vectorizedEnd; i += AVX_VECTOR_SIZE)
                 {
-                    result[i] = MathF.Exp(a[i]);
+                    Vector256<float> aVec = Avx.LoadAlignedVector256(a + i);
+                    Vector256<float> bVec = Avx.LoadAlignedVector256(b + i);
+                    Vector256<float> resultVec = Avx.Min(aVec, bVec);
+                    Avx.StoreAligned(result + i, resultVec);
+                }
+                for (; i < end; i++)
+                {
+                    result[i] = MathF.Min(a[i], b[i]);
+                }
+            });
+        }
+
+        public static void Floor(float* a, float* result, int length)
+        {
+            Parallel.For(0, (length + BLOCK_SIZE - 1) / BLOCK_SIZE, _parallelOptions, chunkIndex =>
+            {
+                int start = chunkIndex * BLOCK_SIZE;
+                int end = Math.Min(start + BLOCK_SIZE, length);
+
+                int i = start;
+                int vectorizableLength = end - start;
+                int vectorizedEnd = start + (vectorizableLength / AVX_VECTOR_SIZE) * AVX_VECTOR_SIZE;
+
+                for (; i < vectorizedEnd; i += AVX_VECTOR_SIZE)
+                {
+                    Vector256<float> aVec = Avx.LoadAlignedVector256(a + i);
+                    Vector256<float> resultVec = Avx.Floor(aVec);
+                    Avx.StoreAligned(result + i, resultVec);
+                }
+                for (; i < end; i++)
+                {
+                    result[i] = MathF.Floor(a[i]);
+                }
+            });
+        }
+
+        public static void Ceiling(float* a, float* result, int length)
+        {
+            Parallel.For(0, (length + BLOCK_SIZE - 1) / BLOCK_SIZE, _parallelOptions, chunkIndex =>
+            {
+                int start = chunkIndex * BLOCK_SIZE;
+                int end = Math.Min(start + BLOCK_SIZE, length);
+
+                int i = start;
+                int vectorizableLength = end - start;
+                int vectorizedEnd = start + (vectorizableLength / AVX_VECTOR_SIZE) * AVX_VECTOR_SIZE;
+
+                for (; i < vectorizedEnd; i += AVX_VECTOR_SIZE)
+                {
+                    Vector256<float> aVec = Avx.LoadAlignedVector256(a + i);
+                    Vector256<float> resultVec = Avx.Ceiling(aVec);
+                    Avx.StoreAligned(result + i, resultVec);
+                }
+                for (; i < end; i++)
+                {
+                    result[i] = MathF.Ceiling(a[i]);
+                }
+            });
+        }
+
+        public static void Round(float* a, float* result, int length)
+        {
+            Parallel.For(0, (length + BLOCK_SIZE - 1) / BLOCK_SIZE, _parallelOptions, chunkIndex =>
+            {
+                int start = chunkIndex * BLOCK_SIZE;
+                int end = Math.Min(start + BLOCK_SIZE, length);
+
+                int i = start;
+                int vectorizableLength = end - start;
+                int vectorizedEnd = start + (vectorizableLength / AVX_VECTOR_SIZE) * AVX_VECTOR_SIZE;
+
+                for (; i < vectorizedEnd; i += AVX_VECTOR_SIZE)
+                {
+                    Vector256<float> aVec = Avx.LoadAlignedVector256(a + i);
+                    Vector256<float> resultVec = Avx.RoundToNearestInteger(aVec);
+                    Avx.StoreAligned(result + i, resultVec);
+                }
+                for (; i < end; i++)
+                {
+                    result[i] = MathF.Round(a[i]);
                 }
             });
         }

@@ -127,14 +127,7 @@ namespace VerbNet.Core
         public static AlignedArray<float> LogE(AlignedArray<float> a)
         {
             AlignedArray<float> result = new AlignedArray<float>(a.Length, a.Alignment);
-            if (Avx.IsSupported)
-            {
-                SimdOperator.LogE(a.Ptr, result.Ptr, a.Length);
-            }
-            else
-            {
-                ScalarOperator.LogE(a.Ptr, result.Ptr, a.Length);
-            }
+            ScalarOperator.LogE(a.Ptr, result.Ptr, a.Length);
 
             return result;
         }
@@ -142,14 +135,7 @@ namespace VerbNet.Core
         public static AlignedArray<float> Exp(AlignedArray<float> a)
         {
             AlignedArray<float> result = new AlignedArray<float>(a.Length, a.Alignment);
-            if (Avx.IsSupported)
-            {
-                SimdOperator.Exp(a.Ptr, result.Ptr, a.Length);
-            }
-            else
-            {
-                ScalarOperator.Exp(a.Ptr, result.Ptr, a.Length);
-            }
+            ScalarOperator.Exp(a.Ptr, result.Ptr, a.Length);
 
             return result;
         }
@@ -206,6 +192,81 @@ namespace VerbNet.Core
         {
             AlignedArray<float> result = new AlignedArray<float>(a.Length, a.Alignment);
             ScalarOperator.Tanh(a.Ptr, result.Ptr, a.Length);
+
+            return result;
+        }
+
+        public static AlignedArray<float> Max(AlignedArray<float> a, AlignedArray<float> b)
+        {
+            AlignedArray<float> result = new AlignedArray<float>(a.Length, a.Alignment);
+            if (Avx.IsSupported)
+            {
+                SimdOperator.Max(a.Ptr, b.Ptr, result.Ptr, a.Length);
+            }
+            else
+            {
+                ScalarOperator.Max(a.Ptr, b.Ptr, result.Ptr, a.Length);
+            }
+
+            return result;
+        }
+
+        public static AlignedArray<float> Min(AlignedArray<float> a, AlignedArray<float> b)
+        {
+            AlignedArray<float> result = new AlignedArray<float>(a.Length, a.Alignment);
+            if (Avx.IsSupported)
+            {
+                SimdOperator.Min(a.Ptr, b.Ptr, result.Ptr, a.Length);
+            }
+            else
+            {
+                ScalarOperator.Min(a.Ptr, b.Ptr, result.Ptr, a.Length);
+            }
+
+            return result;
+        }
+
+        public static AlignedArray<float> Floor(AlignedArray<float> a)
+        {
+            AlignedArray<float> result = new AlignedArray<float>(a.Length, a.Alignment);
+            if (Avx.IsSupported)
+            {
+                SimdOperator.Floor(a.Ptr, result.Ptr, a.Length);
+            }
+            else
+            {
+                ScalarOperator.Floor(a.Ptr, result.Ptr, a.Length);
+            }
+
+            return result;
+        }
+
+        public static AlignedArray<float> Ceiling(AlignedArray<float> a)
+        {
+            AlignedArray<float> result = new AlignedArray<float>(a.Length, a.Alignment);
+            if (Avx.IsSupported)
+            {
+                SimdOperator.Ceiling(a.Ptr, result.Ptr, a.Length);
+            }
+            else
+            {
+                ScalarOperator.Ceiling(a.Ptr, result.Ptr, a.Length);
+            }
+
+            return result;
+        }
+
+        public static AlignedArray<float> Round(AlignedArray<float> a)
+        {
+            AlignedArray<float> result = new AlignedArray<float>(a.Length, a.Alignment);
+            if (Avx.IsSupported)
+            {
+                SimdOperator.Round(a.Ptr, result.Ptr, a.Length);
+            }
+            else
+            {
+                ScalarOperator.Round(a.Ptr, result.Ptr, a.Length);
+            }
 
             return result;
         }

@@ -1,6 +1,4 @@
-﻿using System.Net.NetworkInformation;
-
-namespace VerbNet.Core
+﻿namespace VerbNet.Core
 {
     public static class TensorOperator
     {
@@ -234,7 +232,7 @@ namespace VerbNet.Core
                 result.LeftLeaf = a;
                 result.LeftLeaf.Father = result;
             }
-            else if(requiresGrad && computeGrad)
+            else if (requiresGrad && computeGrad)
             {
                 result.Gradient = Negate(a.Gradient, false, false);
             }
@@ -256,7 +254,7 @@ namespace VerbNet.Core
                 result.LeftLeaf = a;
                 result.LeftLeaf.Father = result;
             }
-            else if(requiresGrad && computeGrad)
+            else if (requiresGrad && computeGrad)
             {
                 Tensor sign = Sign(a.Gradient, false, false);
                 result.Gradient = Multiply(Tensor.One, sign, false, false);
@@ -279,7 +277,7 @@ namespace VerbNet.Core
                 result.LeftLeaf = a;
                 result.LeftLeaf.Father = result;
             }
-            else if(requiresGrad && computeGrad)
+            else if (requiresGrad && computeGrad)
             {
                 result.Gradient = Tensor.Zero;
             }
@@ -347,7 +345,7 @@ namespace VerbNet.Core
                 result.LeftLeaf = a;
                 result.LeftLeaf.Father = result;
             }
-            else if(requiresGrad && computeGrad)
+            else if (requiresGrad && computeGrad)
             {
                 result.Gradient = Exp(a.Gradient, false, false);
             }
@@ -370,7 +368,7 @@ namespace VerbNet.Core
                 result.LeftLeaf = a;
                 result.LeftLeaf.Father = result;
             }
-            else if(requiresGrad && computeGrad)
+            else if (requiresGrad && computeGrad)
             {
                 Tensor power = Power(a.Gradient, exponent - 1f);
                 result.Gradient = Multiply(power, Tensor.Create(exponent, false), false, false);
@@ -393,7 +391,7 @@ namespace VerbNet.Core
                 result.LeftLeaf = a;
                 result.LeftLeaf.Father = result;
             }
-            else if(requiresGrad && computeGrad);
+            else if (requiresGrad && computeGrad)
             {
                 result.Gradient = Cos(a.Gradient, false, false);
             }
@@ -516,6 +514,200 @@ namespace VerbNet.Core
             return result;
         }
 
+        public static Tensor Max(Tensor a, Tensor b, bool buildGraph = true, bool computeGrad = true)
+        {
+            if (a == null)
+                throw new ArgumentNullException(nameof(a));
+            if (b == null)
+                throw new ArgumentNullException(nameof(b));
+
+            Tensor aBroadcast, bBroadcast;
+            (aBroadcast, bBroadcast) = Broadcast(a, b, false, false);
+
+            bool requiresGrad = computeGrad && (a.RequiresGrad || b.RequiresGrad);
+            Tensor result = new Tensor(Operator.Max(aBroadcast.Data, bBroadcast.Data), aBroadcast.Shape, requiresGrad);
+
+            if (buildGraph)
+            {
+                byte[] maxIndices = new byte[aBroadcast.Length];
+                for (int i = 0; i < aBroadcast.Length; i++)
+                {
+                    float aValue = aBroadcast.Data[i];
+                    float bValue = bBroadcast.Data[i];
+
+                    if (aValue > bValue)
+                    {
+                        maxIndices[i] = 0;
+                    }
+                    else if (aValue < bValue)
+                    {
+                        maxIndices[i] = 1;
+                    }
+                    else
+                    {
+                        maxIndices[i] = 2;
+                    }
+                }
+
+                result.GradFn = GradFunction.MaxGradFn;
+                result.OpArgs.Add("Max_maxIndices", maxIndices);
+                result.LeftLeaf = a;
+                result.LeftLeaf.Father = result;
+                result.RightLeaf = b;
+                result.RightLeaf.Father = result;
+            }
+            else if (requiresGrad && computeGrad)
+            {
+                result.Gradient = Max(a.Gradient, b.Gradient, false, false);
+            }
+
+            return result;
+        }
+
+        public static Tensor Max(Tensor a, float b)
+        {
+            Tensor bTensor = Tensor.Create(b);
+
+            return Max(a, bTensor, false);
+        }
+
+        public static Tensor Max(float a, Tensor b)
+        {
+            Tensor aTensor = Tensor.Create(a);
+
+            return Max(aTensor, b, false);
+        }
+
+        public static Tensor Min(Tensor a, Tensor b, bool buildGraph = true, bool computeGrad = true)
+        {
+            if (a == null)
+                throw new ArgumentNullException(nameof(a));
+            if (b == null)
+                throw new ArgumentNullException(nameof(b));
+
+            Tensor aBroadcast, bBroadcast;
+            (aBroadcast, bBroadcast) = Broadcast(a, b, false, false);
+
+            bool requiresGrad = computeGrad && (a.RequiresGrad || b.RequiresGrad);
+            Tensor result = new Tensor(Operator.Min(aBroadcast.Data, bBroadcast.Data), aBroadcast.Shape, requiresGrad);
+
+            if (buildGraph)
+            {
+                byte[] minIndices = new byte[aBroadcast.Length];
+                for (int i = 0; i < aBroadcast.Length; i++)
+                {
+                    float aValue = aBroadcast.Data[i];
+                    float bValue = bBroadcast.Data[i];
+
+                    if (aValue < bValue)
+                    {
+                        minIndices[i] = 0;
+                    }
+                    else if (aValue > bValue)
+                    {
+                        minIndices[i] = 1;
+                    }
+                    else
+                    {
+                        minIndices[i] = 2;
+                    }
+                }
+
+                result.GradFn = GradFunction.MinGradFn;
+                result.OpArgs.Add("Min_minIndices", minIndices);
+                result.LeftLeaf = a;
+                result.LeftLeaf.Father = result;
+                result.RightLeaf = b;
+                result.RightLeaf.Father = result;
+            }
+            else if (requiresGrad && computeGrad)
+            {
+                result.Gradient = Min(a.Gradient, b.Gradient, false, false);
+            }
+
+            return result;
+        }
+
+        public static Tensor Min(Tensor a, float b)
+        {
+            Tensor bTensor = Tensor.Create(b);
+
+            return Min(a, bTensor, false);
+        }
+
+        public static Tensor Min(float a, Tensor b)
+        {
+            Tensor aTensor = Tensor.Create(a);
+
+            return Min(aTensor, b, false);
+        }
+
+        public static Tensor Floor(Tensor a, bool buildGraph = true, bool computeGrad = true)
+        {
+            if (a == null)
+                throw new ArgumentNullException(nameof(a));
+
+            bool requiresGrad = computeGrad && a.RequiresGrad;
+            Tensor result = new Tensor(Operator.Floor(a.Data), a.Shape, requiresGrad);
+
+            if (buildGraph)
+            {
+                result.GradFn = GradFunction.FloorGradFn;
+                result.LeftLeaf = a;
+                result.LeftLeaf.Father = result;
+            }
+            else if (requiresGrad && computeGrad)
+            {
+                result.Gradient = Tensor.Zero;
+            }
+
+            return result;
+        }
+
+        public static Tensor Ceiling(Tensor a, bool buildGraph = true, bool computeGrad = true)
+        {
+            if (a == null)
+                throw new ArgumentNullException(nameof(a));
+
+            bool requiresGrad = computeGrad && a.RequiresGrad;
+            Tensor result = new Tensor(Operator.Ceiling(a.Data), a.Shape, requiresGrad);
+
+            if (buildGraph)
+            {
+                result.GradFn = GradFunction.CeilingGradFn;
+                result.LeftLeaf = a;
+                result.LeftLeaf.Father = result;
+            }
+            else if (requiresGrad && computeGrad)
+            {
+                result.Gradient = Tensor.Zero;
+            }
+
+            return result;
+        }
+
+        public static Tensor Round(Tensor a, bool buildGraph = true, bool computeGrad = true)
+        {
+            if (a == null)
+                throw new ArgumentNullException(nameof(a));
+
+            bool requiresGrad = computeGrad && a.RequiresGrad;
+            Tensor result = new Tensor(Operator.Round(a.Data), a.Shape, requiresGrad);
+
+            if (buildGraph)
+            {
+                result.GradFn = GradFunction.RoundGradFn;
+                result.LeftLeaf = a;
+                result.LeftLeaf.Father = result;
+            }
+            else if (requiresGrad && computeGrad)
+            {
+                result.Gradient = Tensor.Zero;
+            }
+
+            return result;
+        }
+
         public static Tensor MatMul(Tensor a, Tensor b, bool buildGraph = true, bool computeGrad = true)
         {
             if (a == null)
@@ -545,7 +737,7 @@ namespace VerbNet.Core
                 result.LeftLeaf.Father = result;
                 result.RightLeaf.Father = result;
             }
-            else if(requiresGrad && computeGrad)
+            else if (requiresGrad && computeGrad)
             {
                 if (a.RequiresGrad && b.RequiresGrad)
                 {

@@ -1,6 +1,3 @@
-using System.Reflection.Metadata;
-using System.Runtime.CompilerServices;
-
 namespace VerbNet.Core
 {
     public class AdamOptimizer : Optimizer
@@ -41,10 +38,10 @@ namespace VerbNet.Core
                 Tensor vHat = V[i] / (1f - MathF.Pow(Beta2, T));
 
                 Tensor delta = LearningRate * mHat / (TensorOperator.Sqrt(vHat, false) + Epsilon);
-                
+
                 // 不可以直接赋值，因为会破坏引用关系
                 // Parameters[i] = TensorOperator.Subtract(Parameters[i], delta, false, true);
-                
+
                 Parallel.For(0, Parameters[i].Length, j =>
                 {
                     Parameters[i].Data[j] -= delta.Data[j];

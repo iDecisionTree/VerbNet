@@ -206,6 +206,15 @@ namespace VerbNet.Core
         public static Tensor Sinh(Tensor a) => TensorOperator.Sinh(a, true, true);
         public static Tensor Cosh(Tensor a) => TensorOperator.Cosh(a, true, true);
         public static Tensor Tanh(Tensor a) => TensorOperator.Tanh(a, true, true);
+        public static Tensor Max(Tensor a, Tensor b) => TensorOperator.Max(a, b, true, true);
+        public static Tensor Max(Tensor a, float b) => TensorOperator.Max(a, b);
+        public static Tensor Max(float a, Tensor b) => TensorOperator.Max(a, b);
+        public static Tensor Min(Tensor a, Tensor b) => TensorOperator.Min(a, b, true, true);
+        public static Tensor Min(Tensor a, float b) => TensorOperator.Min(a, b);
+        public static Tensor Min(float a, Tensor b) => TensorOperator.Min(a, b);
+        public static Tensor Floor(Tensor a) => TensorOperator.Floor(a, true, true);
+        public static Tensor Ceiling(Tensor a) => TensorOperator.Ceiling(a, true, true);
+        public static Tensor Round(Tensor a) => TensorOperator.Round(a, true, true);
         public static Tensor Transpose(Tensor a) => TensorOperator.Transpose(a, true, true);
         public static Tensor MatMul(Tensor a, Tensor b) => TensorOperator.MatMul(a, b, true, true);
 

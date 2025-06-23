@@ -142,6 +142,83 @@
             return (grad, null);
         }
 
+        public static (Tensor, Tensor) MaxGradFn(Tensor gradient, Tensor leftLeaf, Tensor rightLeaf, Dictionary<string, object> opArgs)
+        {
+            byte[] maxIndices = (byte[])opArgs["Max_maxIndices"];
+
+            AlignedArray<float> leftGradData = new AlignedArray<float>(leftLeaf.Length, leftLeaf.Data.Alignment);
+            AlignedArray<float> rightGradData = new AlignedArray<float>(rightLeaf.Length, rightLeaf.Data.Alignment);
+
+            for (int i = 0; i < maxIndices.Length; i++)
+            {
+                float grad = gradient.Data[i];
+                switch (maxIndices[i])
+                {
+                    case 0:
+                        leftGradData[i] = grad;
+                        break;
+                    case 1:
+                        rightGradData[i] = grad;
+                        break;
+                    case 2:
+                        leftGradData[i] = grad * 0.5f;
+                        rightGradData[i] = grad * 0.5f;
+                        break;
+                }
+            }
+
+            Tensor leftGrad = new Tensor(leftGradData, leftLeaf.Shape, false);
+            Tensor rightGrad = new Tensor(rightGradData, rightLeaf.Shape, false);
+
+            return (leftGrad, rightGrad);
+        }
+
+        public static (Tensor, Tensor) MinGradFn(Tensor gradient, Tensor leftLeaf, Tensor rightLeaf, Dictionary<string, object> opArgs)
+        {
+            byte[] minIndices = (byte[])opArgs["Min_minIndices"];
+
+            AlignedArray<float> leftGradData = new AlignedArray<float>(leftLeaf.Length, leftLeaf.Data.Alignment);
+            AlignedArray<float> rightGradData = new AlignedArray<float>(rightLeaf.Length, rightLeaf.Data.Alignment);
+
+            for (int i = 0; i < minIndices.Length; i++)
+            {
+                float grad = gradient.Data[i];
+                switch (minIndices[i])
+                {
+                    case 0:
+                        leftGradData[i] = grad;
+                        break;
+                    case 1:
+                        rightGradData[i] = grad;
+                        break;
+                    case 2:
+                        leftGradData[i] = grad * 0.5f;
+                        rightGradData[i] = grad * 0.5f;
+                        break;
+                }
+            }
+
+            Tensor leftGrad = new Tensor(leftGradData, leftLeaf.Shape, false);
+            Tensor rightGrad = new Tensor(rightGradData, rightLeaf.Shape, false);
+
+            return (leftGrad, rightGrad);
+        }
+
+        public static (Tensor, Tensor) FloorGradFn(Tensor gradient, Tensor leftLeaf, Tensor rightLeaf, Dictionary<string, object> opArgs)
+        {
+            return (Tensor.Zero, null);
+        }
+
+        public static (Tensor, Tensor) CeilingGradFn(Tensor gradient, Tensor leftLeaf, Tensor rightLeaf, Dictionary<string, object> opArgs)
+        {
+            return (Tensor.Zero, null);
+        }
+
+        public static (Tensor, Tensor) RoundGradFn(Tensor gradient, Tensor leftLeaf, Tensor rightLeaf, Dictionary<string, object> opArgs)
+        {
+            return (Tensor.Zero, null);
+        }
+
         public static (Tensor, Tensor) MatMulGradFn(Tensor gradient, Tensor leftLeaf, Tensor rightLeaf, Dictionary<string, object> opArgs)
         {
             Tensor bTransposed = TensorOperator.Transpose(rightLeaf, false, false);
