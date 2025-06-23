@@ -36,7 +36,7 @@
 
         public static (Tensor, Tensor) NegGradFn(Tensor gradient, Tensor leftLeaf, Tensor rightLeaf, Dictionary<string, object> opArgs)
         {
-            Tensor leftGrad = TensorOperator.Negate(gradient, false);
+            Tensor leftGrad = TensorOperator.Negate(gradient, false, false);
 
             return (leftGrad, null);
         }
@@ -56,8 +56,8 @@
 
         public static (Tensor, Tensor) SqrtGradFn(Tensor gradient, Tensor leftLeaf, Tensor rightLeaf, Dictionary<string, object> opArgs)
         {
-            Tensor sqrtX = TensorOperator.Sqrt(leftLeaf, false);
-            Tensor denominator = TensorOperator.Multiply(new Tensor([2f], [1], false), sqrtX, false, false);
+            Tensor sqrtX = TensorOperator.Sqrt(leftLeaf, false, false);
+            Tensor denominator = TensorOperator.Multiply(Tensor.Create(2f, false), sqrtX, false, false);
             Tensor grad = TensorOperator.Divide(gradient, denominator, false, false);
 
             return (grad, null);
@@ -82,10 +82,9 @@
         public static (Tensor, Tensor) PowerGradFn(Tensor gradient, Tensor leftLeaf, Tensor rightLeaf, Dictionary<string, object> opArgs)
         {
             float exponent = (float)opArgs["Power_exponent"];
-            Tensor powerTensor = new Tensor([exponent], [1], false);
 
             Tensor leftPower = TensorOperator.Power(leftLeaf, exponent - 1f, false);
-            Tensor leftGrad = TensorOperator.Multiply(gradient, TensorOperator.Multiply(powerTensor, leftPower, false, false), false, false);
+            Tensor leftGrad = TensorOperator.Multiply(gradient, TensorOperator.Multiply(Tensor.Create(exponent, false), leftPower, false, false), false, false);
 
             return (leftGrad, null);
         }

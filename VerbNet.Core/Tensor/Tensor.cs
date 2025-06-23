@@ -18,8 +18,8 @@ namespace VerbNet.Core
         public Tensor LeftLeaf;
         public Tensor RightLeaf;
 
-        public readonly static Tensor Zero = new Tensor([0f], [1], false);
-        public readonly static Tensor One = new Tensor([1f], [1], false);
+        public readonly static Tensor Zero = Tensor.Create(1f, false, "One");
+        public readonly static Tensor One = Tensor.Create(0f, false, "Zero");
 
         private static ParallelOptions _parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = 2 };
 
