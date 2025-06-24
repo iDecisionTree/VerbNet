@@ -191,8 +191,8 @@ namespace VerbNet.Core
         public static Tensor operator /(float a, Tensor b) => TensorOperator.Divide(a, b);
         public static Tensor operator -(Tensor a) => TensorOperator.Negate(a, true, true);
 
-        public Tensor Repeat(int axis, int repeat = 2) => TensorOperator.Repeat(this, axis, repeat, true);
-        public Tensor Reshape(int[] shape) => TensorOperator.Reshape(this, shape, true);
+        public Tensor Repeat(int axis, int repeat = 2) => TensorOperator.Repeat(this, axis, repeat, true, true);
+        public Tensor Reshape(int[] shape) => TensorOperator.Reshape(this, shape, true, true);
 
         public static Tensor Abs(Tensor a) => TensorOperator.Abs(a, true, true);
         public static Tensor Sign(Tensor a) => TensorOperator.Sign(a, true, true);
