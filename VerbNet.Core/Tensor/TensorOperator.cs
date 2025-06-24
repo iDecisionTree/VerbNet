@@ -10,7 +10,7 @@
                 throw new ArgumentNullException(nameof(b));
 
             Tensor aBroadcast, bBroadcast;
-            (aBroadcast, bBroadcast) = Broadcast(a, b, false, false);
+            (aBroadcast, bBroadcast) = Broadcast(a, b, false);
 
             bool requiresGrad = computeGrad && (a.RequiresGrad || b.RequiresGrad);
             Tensor result = new Tensor(Operator.Add(aBroadcast.Data, bBroadcast.Data), aBroadcast.Shape, requiresGrad);
@@ -60,7 +60,7 @@
                 throw new ArgumentNullException(nameof(b));
 
             Tensor aBroadcast, bBroadcast;
-            (aBroadcast, bBroadcast) = Broadcast(a, b, false, false);
+            (aBroadcast, bBroadcast) = Broadcast(a, b, false);
 
             bool requiresGrad = computeGrad && (a.RequiresGrad || b.RequiresGrad);
             Tensor result = new Tensor(Operator.Subtract(aBroadcast.Data, bBroadcast.Data), aBroadcast.Shape, requiresGrad);
@@ -117,7 +117,7 @@
                 throw new ArgumentNullException(nameof(b));
 
             Tensor aBroadcast, bBroadcast;
-            (aBroadcast, bBroadcast) = Broadcast(a, b, false, false);
+            (aBroadcast, bBroadcast) = Broadcast(a, b, false);
 
             bool requiresGrad = computeGrad && (a.RequiresGrad || b.RequiresGrad);
             Tensor result = new Tensor(Operator.Multiply(aBroadcast.Data, bBroadcast.Data), aBroadcast.Shape, requiresGrad);
@@ -167,7 +167,7 @@
                 throw new ArgumentNullException(nameof(b));
 
             Tensor aBroadcast, bBroadcast;
-            (aBroadcast, bBroadcast) = Broadcast(a, b, false, false);
+            (aBroadcast, bBroadcast) = Broadcast(a, b, false);
 
             bool requiresGrad = computeGrad && (a.RequiresGrad || b.RequiresGrad);
             Tensor result = new Tensor(Operator.Divide(aBroadcast.Data, bBroadcast.Data), aBroadcast.Shape, requiresGrad);
@@ -522,7 +522,7 @@
                 throw new ArgumentNullException(nameof(b));
 
             Tensor aBroadcast, bBroadcast;
-            (aBroadcast, bBroadcast) = Broadcast(a, b, false, false);
+            (aBroadcast, bBroadcast) = Broadcast(a, b, false);
 
             bool requiresGrad = computeGrad && (a.RequiresGrad || b.RequiresGrad);
             Tensor result = new Tensor(Operator.Max(aBroadcast.Data, bBroadcast.Data), aBroadcast.Shape, requiresGrad);
@@ -586,7 +586,7 @@
                 throw new ArgumentNullException(nameof(b));
 
             Tensor aBroadcast, bBroadcast;
-            (aBroadcast, bBroadcast) = Broadcast(a, b, false, false);
+            (aBroadcast, bBroadcast) = Broadcast(a, b, false);
 
             bool requiresGrad = computeGrad && (a.RequiresGrad || b.RequiresGrad);
             Tensor result = new Tensor(Operator.Min(aBroadcast.Data, bBroadcast.Data), aBroadcast.Shape, requiresGrad);
@@ -784,7 +784,7 @@
             return result;
         }
 
-        public static Tensor Repeat(Tensor a, int axis, int repeat = 2, bool buildGraph = true, bool computeGrad = true)
+        public static Tensor Repeat(Tensor a, int axis, int repeat = 2, bool computeGrad = true)
         {
             if (a == null)
                 throw new ArgumentNullException(nameof(a));
@@ -799,16 +799,7 @@
 
             if (repeat == 1)
             {
-                result = Reshape(a, newShape, false, false);
-
-                if (buildGraph)
-                {
-                    result.GradFn = GradFunction.RepeatGradFn;
-                    result.OpArgs.Add("Repeat_axis", axis);
-                    result.OpArgs.Add("Repeat_repeat", repeat);
-                    result.LeftLeaf = a;
-                    result.LeftLeaf.Father = result;
-                }
+                result = Reshape(a, newShape, false);
 
                 return result;
             }
@@ -858,24 +849,15 @@
 
             bool requiresGrad = computeGrad && a.RequiresGrad;
             result = new Tensor(newData, newShape, requiresGrad);
-
-            if (buildGraph)
+            if (requiresGrad)
             {
-                result.GradFn = GradFunction.RepeatGradFn;
-                result.OpArgs.Add("Repeat_axis", axis);
-                result.OpArgs.Add("Repeat_repeat", repeat);
-                result.LeftLeaf = a;
-                result.LeftLeaf.Father = result;
-            }
-            else if (requiresGrad && computeGrad)
-            {
-                result.Gradient = Repeat(a.Gradient, axis, repeat, false, false);
+                result.Gradient = Repeat(a.Gradient, axis, repeat, false);
             }
 
             return result;
         }
 
-        public static Tensor Reshape(Tensor a, int[] newShape, bool buildGraph = true, bool computeGrad = true)
+        public static Tensor Reshape(Tensor a, int[] newShape, bool computeGrad = true)
         {
             int length = a.Data.Length;
             int newLength = newShape.Aggregate(1, (a, b) => a * b);
@@ -885,16 +867,9 @@
 
             bool requiresGrad = computeGrad && a.RequiresGrad;
             Tensor result = new Tensor(a.Data, newShape, requiresGrad);
-
-            if (buildGraph)
+            if (requiresGrad)
             {
-                result.GradFn = GradFunction.ReshapeGradFn;
-                result.LeftLeaf = a;
-                result.LeftLeaf.Father = result;
-            }
-            else if (requiresGrad && computeGrad)
-            {
-                result.Gradient = Reshape(a.Gradient, newShape, false, false);
+                result.Gradient = Reshape(a.Gradient, newShape, false);
             }
 
             return result;
@@ -917,7 +892,7 @@
             Random rand = new Random();
             for (int i = 0; i < data.Length; i++)
             {
-                data[i] = (float)(rand.NextDouble() * 2d - 1d) * scale;
+                data[i] = (rand.NextSingle() * 2f - 1f) * scale;
             }
 
             Tensor result = new Tensor(data, shape, requiresGrad, name);
@@ -959,7 +934,7 @@
             return reversedResult.ToArray();
         }
 
-        public static Tensor BroadcastTo(Tensor tensor, int[] targetShape, bool buildGraph = true, bool computeGrad = true)
+        public static Tensor BroadcastTo(Tensor tensor, int[] targetShape, bool computeGrad = true)
         {
             if (tensor == null)
                 throw new ArgumentNullException(nameof(tensor));
@@ -969,9 +944,6 @@
             int[] broadcastedShape = GetBroadcastShape(tensor.Shape, targetShape);
             if (!Enumerable.SequenceEqual(broadcastedShape, targetShape))
                 throw new ArgumentException($"Cannot broadcast tensor from shape [{string.Join(", ", tensor.Shape)}] to [{string.Join(", ", targetShape)}]");
-
-            if (tensor.Shape.SequenceEqual(targetShape))
-                return buildGraph ? tensor.Clone() : tensor;
 
             int targetRank = targetShape.Length;
             int tensorRank = tensor.Shape.Length;
@@ -1021,28 +993,19 @@
 
             bool requiresGrad = computeGrad && tensor.RequiresGrad;
             Tensor result = new Tensor(broadcastData, targetShape, requiresGrad);
-
-            if (buildGraph)
+            if (requiresGrad)
             {
-                result.GradFn = GradFunction.BroadcastGradFn;
-                result.OpArgs["Broadcast_targetShape"] = targetShape;
-                result.OpArgs["Broadcast_originalShape"] = tensor.Shape;
-                result.LeftLeaf = tensor;
-                result.LeftLeaf.Father = result;
-            }
-            else if (requiresGrad && computeGrad)
-            {
-                result.Gradient = BroadcastTo(tensor.Gradient, targetShape, false, false);
+                result.Gradient = BroadcastTo(tensor.Gradient, targetShape);
             }
 
             return result;
         }
 
-        public static (Tensor, Tensor) Broadcast(Tensor a, Tensor b, bool buildGraph = true, bool computeGrad = true)
+        public static (Tensor, Tensor) Broadcast(Tensor a, Tensor b, bool computeGrad = true)
         {
             int[] broadcastShape = GetBroadcastShape(a.Shape, b.Shape);
-            Tensor aBroadcast = BroadcastTo(a, broadcastShape, buildGraph, computeGrad);
-            Tensor bBroadcast = BroadcastTo(b, broadcastShape, buildGraph, computeGrad);
+            Tensor aBroadcast = BroadcastTo(a, broadcastShape, computeGrad);
+            Tensor bBroadcast = BroadcastTo(b, broadcastShape, computeGrad);
 
             return (aBroadcast, bBroadcast);
         }
