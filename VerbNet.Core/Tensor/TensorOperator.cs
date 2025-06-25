@@ -45,11 +45,11 @@
             return result;
         }
 
-        public static Tensor Add(Tensor a, float b, bool buildGraph = true)
+        public static Tensor Add(Tensor a, float b)
         {
             Tensor bTensor = Tensor.Create(b);
 
-            return Add(a, bTensor, false);
+            return Add(a, bTensor, false, true);
         }
 
         public static Tensor Subtract(Tensor a, Tensor b, bool buildGraph = true, bool computeGrad = true)
@@ -106,7 +106,7 @@
         {
             Tensor aTensor = Tensor.Create(a);
 
-            return Subtract(aTensor, b, false);
+            return Subtract(aTensor, b, false, true);
         }
 
         public static Tensor Multiply(Tensor a, Tensor b, bool buildGraph = true, bool computeGrad = true)
@@ -156,7 +156,7 @@
         {
             Tensor bTensor = Tensor.Create(b);
 
-            return Multiply(a, bTensor, false);
+            return Multiply(a, bTensor, false, true);
         }
 
         public static Tensor Divide(Tensor a, Tensor b, bool buildGraph = true, bool computeGrad = true)
@@ -208,7 +208,7 @@
         {
             Tensor bTensor = Tensor.Create(b);
 
-            return Divide(a, bTensor, false);
+            return Divide(a, bTensor, false, true);
         }
 
         public static Tensor Divide(float a, Tensor b)
@@ -797,22 +797,6 @@
             int[] newShape = a.Shape.ToArray();
             newShape[axis] *= repeat;
 
-            if (repeat == 1)
-            {
-                result = Reshape(a, newShape, false, false);
-
-                if (buildGraph)
-                {
-                    result.GradFn = GradFunction.RepeatGradFn;
-                    result.OpArgs.Add("Repeat_axis", axis);
-                    result.OpArgs.Add("Repeat_repeat", repeat);
-                    result.LeftLeaf = a;
-                    result.LeftLeaf.Father = result;
-                }
-
-                return result;
-            }
-
             int outer = 1;
             for (int i = 0; i < axis; i++)
             {
@@ -895,6 +879,70 @@
             else if (requiresGrad && computeGrad)
             {
                 result.Gradient = Reshape(a.Gradient, newShape, false, false);
+            }
+
+            return result;
+        }
+
+        public static Tensor Concat(Tensor a, Tensor b, int dim, bool buildGraph = true, bool computeGrad = true)
+        {
+            if (a == null)
+                throw new ArgumentNullException(nameof(a));
+            if (b == null)
+                throw new ArgumentNullException(nameof(b));
+            if (dim < 0 || dim >= a.Rank || dim >= b.Rank)
+                throw new ArgumentOutOfRangeException(nameof(dim), "Dimension must be within the rank of both tensors.");
+            if (a.Rank != b.Rank)
+                throw new ArgumentException("Both tensors must have the same rank for concatenation.");
+
+            for (int i = 0; i < a.Rank; i++)
+            {
+                if (i != dim && a.Shape[i] != b.Shape[i])
+                {
+                    throw new ArgumentException($"Tensors cannot be concatenated along dimension {dim} because their shapes differ in dimension {i}: {a.Shape[i]} vs {b.Shape[i]}");
+                }
+            }
+
+            int[] newShape = (int[])a.Shape.Clone();
+            newShape[dim] = a.Shape[dim] + b.Shape[dim];
+
+            int totalElements = newShape.Aggregate(1, (acc, val) => acc * val);
+            AlignedArray<float> resultData = new AlignedArray<float>(totalElements, a.Data.Alignment);
+
+            Parallel.For(0, totalElements, i =>
+            {
+                int[] resultIndices = GetMultiIndex(i, newShape);
+                int dimValue = resultIndices[dim];
+                if (dimValue < a.Shape[dim])
+                {
+                    int[] aIndices = (int[])resultIndices.Clone();
+                    int aLinearIndex = GetLinearIndex(aIndices, a.Shape);
+                    resultData[i] = a.Data[aLinearIndex];
+                }
+                else
+                {
+                    int[] bIndices = (int[])resultIndices.Clone();
+                    bIndices[dim] -= a.Shape[dim];
+                    int bLinearIndex = GetLinearIndex(bIndices, b.Shape);
+                    resultData[i] = b.Data[bLinearIndex];
+                }
+            });
+
+            bool requiresGrad = computeGrad && (a.RequiresGrad || b.RequiresGrad);
+            Tensor result = new Tensor(resultData, newShape, requiresGrad);
+
+            if (buildGraph)
+            {
+                result.GradFn = GradFunction.ConcatGradFn;
+                result.OpArgs["Concat_dim"] = dim;
+                result.LeftLeaf = a;
+                result.RightLeaf = b;
+                result.LeftLeaf.Father = result;
+                result.RightLeaf.Father = result;
+            }
+            else if (requiresGrad && computeGrad)
+            {
+                result.Gradient = Concat(a.Gradient, b.Gradient, dim, false, false);
             }
 
             return result;
@@ -1045,6 +1093,32 @@
             Tensor bBroadcast = BroadcastTo(b, broadcastShape, buildGraph, computeGrad);
 
             return (aBroadcast, bBroadcast);
+        }
+
+        public static int[] GetMultiIndex(int linearIndex, int[] shape)
+        {
+            int[] indices = new int[shape.Length];
+            int temp = linearIndex;
+            for (int i = shape.Length - 1; i >= 0; i--)
+            {
+                indices[i] = temp % shape[i];
+                temp /= shape[i];
+            }
+
+            return indices;
+        }
+
+        public static int GetLinearIndex(int[] indices, int[] shape)
+        {
+            int index = 0;
+            int stride = 1;
+            for (int i = shape.Length - 1; i >= 0; i--)
+            {
+                index += indices[i] * stride;
+                stride *= shape[i];
+            }
+
+            return index;
         }
     }
 }

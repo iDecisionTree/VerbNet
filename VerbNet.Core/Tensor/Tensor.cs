@@ -178,8 +178,8 @@ namespace VerbNet.Core
         }
 
         public static Tensor operator +(Tensor a, Tensor b) => TensorOperator.Add(a, b, true, true);
-        public static Tensor operator +(Tensor a, float b) => TensorOperator.Add(a, b, false);
-        public static Tensor operator +(float a, Tensor b) => TensorOperator.Add(b, a, false);
+        public static Tensor operator +(Tensor a, float b) => TensorOperator.Add(a, b);
+        public static Tensor operator +(float a, Tensor b) => TensorOperator.Add(b, a);
         public static Tensor operator -(Tensor a, Tensor b) => TensorOperator.Subtract(a, b, true, true);
         public static Tensor operator -(Tensor a, float b) => TensorOperator.Subtract(a, b);
         public static Tensor operator -(float a, Tensor b) => TensorOperator.Subtract(a, b);
@@ -192,7 +192,11 @@ namespace VerbNet.Core
         public static Tensor operator -(Tensor a) => TensorOperator.Negate(a, true, true);
 
         public Tensor Repeat(int axis, int repeat = 2) => TensorOperator.Repeat(this, axis, repeat, true, true);
+        public static Tensor Repeat(Tensor a, int axis, int repeat = 2) => TensorOperator.Repeat(a, axis, repeat, true, true);
         public Tensor Reshape(int[] shape) => TensorOperator.Reshape(this, shape, true, true);
+        public static Tensor Reshape(Tensor a, int[] shape) => TensorOperator.Reshape(a, shape, true, true);
+        public Tensor Cat(Tensor b, int dim) => TensorOperator.Concat(this, b, dim, true, true);
+        public static Tensor Cat(Tensor a, Tensor b, int dim) => TensorOperator.Concat(a, b, dim, true, true);
 
         public static Tensor Abs(Tensor a) => TensorOperator.Abs(a, true, true);
         public static Tensor Sign(Tensor a) => TensorOperator.Sign(a, true, true);

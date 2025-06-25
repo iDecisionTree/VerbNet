@@ -299,6 +299,42 @@
             return (reshapedGradient, null);
         }
 
+        public static (Tensor, Tensor) ConcatGradFn(Tensor gradient, Tensor leftLeaf, Tensor rightLeaf, Dictionary<string, object> opArgs)
+        {
+            int dim = (int)opArgs["Concat_dim"];
+            int aDim = leftLeaf.Shape[dim];
+            int bDim = rightLeaf.Shape[dim];
+            int totalElements = gradient.Length;
+
+            AlignedArray<float> leftGradData = new AlignedArray<float>(leftLeaf.Length, gradient.Data.Alignment);
+            AlignedArray<float> rightGradData = new AlignedArray<float>(rightLeaf.Length, gradient.Data.Alignment);
+
+            Parallel.For(0, totalElements, i =>
+            {
+                int[] indices = TensorOperator.GetMultiIndex(i, gradient.Shape);
+                int dimIndex = indices[dim];
+
+                if (dimIndex < aDim)
+                {
+                    int[] leftIndices = (int[])indices.Clone();
+                    int leftIndex = TensorOperator.GetLinearIndex(leftIndices, leftLeaf.Shape);
+                    leftGradData[leftIndex] = gradient.Data[i];
+                }
+                else
+                {
+                    int[] rightIndices = (int[])indices.Clone();
+                    rightIndices[dim] = dimIndex - aDim;
+                    int rightIndex = TensorOperator.GetLinearIndex(rightIndices, rightLeaf.Shape);
+                    rightGradData[rightIndex] = gradient.Data[i];
+                }
+            });
+
+            Tensor leftGrad = new Tensor(leftGradData, leftLeaf.Shape, false);
+            Tensor rightGrad = new Tensor(rightGradData, rightLeaf.Shape, false);
+
+            return (leftGrad, rightGrad);
+        }
+
         public static (Tensor, Tensor) BroadcastGradFn(Tensor gradient, Tensor leftLeaf, Tensor rightLeaf, Dictionary<string, object> opArgs)
         {
             int[] originalShape = (int[])opArgs["OriginalShape"];
