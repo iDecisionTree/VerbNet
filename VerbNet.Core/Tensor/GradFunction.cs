@@ -144,62 +144,80 @@
 
         public static (Tensor, Tensor) MaxGradFn(Tensor gradient, Tensor leftLeaf, Tensor rightLeaf, Dictionary<string, object> opArgs)
         {
-            byte[] maxIndices = (byte[])opArgs["Max_maxIndices"];
+            bool[] maskA = (bool[])opArgs["Max_maskA"]; 
+            bool[] maskB = (bool[])opArgs["Max_maskB"];
+            bool[] equalMask = (bool[])opArgs["Max_equalMask"];
 
-            AlignedArray<float> leftGradData = new AlignedArray<float>(leftLeaf.Length, leftLeaf.Data.Alignment);
-            AlignedArray<float> rightGradData = new AlignedArray<float>(rightLeaf.Length, rightLeaf.Data.Alignment);
+            Tensor leftGrad = new Tensor(leftLeaf.Shape, false);
+            Tensor rightGrad = new Tensor(rightLeaf.Shape, false);
 
-            for (int i = 0; i < maxIndices.Length; i++)
+            for (int i = 0; i < gradient.Length; i++)
             {
-                float grad = gradient.Data[i];
-                switch (maxIndices[i])
+                int[] broadcastedIndex = TensorOperator.GetMultiIndex(i, gradient.Shape);
+
+                if (maskA[i])
                 {
-                    case 0:
-                        leftGradData[i] = grad;
-                        break;
-                    case 1:
-                        rightGradData[i] = grad;
-                        break;
-                    case 2:
-                        leftGradData[i] = grad * 0.5f;
-                        rightGradData[i] = grad * 0.5f;
-                        break;
+                    int[] originalMultiIndex = TensorOperator.BroadcastedToOriginalIndex(broadcastedIndex, leftLeaf.Shape, gradient.Shape);
+                    int originalIndex = TensorOperator.GetLinearIndex(originalMultiIndex, leftLeaf.Shape);
+                    leftGrad.Data[originalIndex] += gradient.Data[i];
+                }
+                else if (maskB[i])
+                {
+                    int[] originalMultiIndex = TensorOperator.BroadcastedToOriginalIndex(broadcastedIndex, rightLeaf.Shape, gradient.Shape);
+                    int originalIndex = TensorOperator.GetLinearIndex(originalMultiIndex, rightLeaf.Shape);
+                    rightGrad.Data[originalIndex] += gradient.Data[i];
+                }
+                else if (equalMask[i])
+                {
+                    int[] originalMultiIndexLeft = TensorOperator.BroadcastedToOriginalIndex(broadcastedIndex, leftLeaf.Shape, gradient.Shape);
+                    int originalIndexLeft = TensorOperator.GetLinearIndex(originalMultiIndexLeft, leftLeaf.Shape);
+                    int[] originalMultiIndexRight = TensorOperator.BroadcastedToOriginalIndex(broadcastedIndex, rightLeaf.Shape, gradient.Shape);
+                    int originalIndexRight = TensorOperator.GetLinearIndex(originalMultiIndexRight, rightLeaf.Shape);
+
+                    leftGrad.Data[originalIndexLeft] += gradient.Data[i] * 0.5f;
+                    rightGrad.Data[originalIndexRight] += gradient.Data[i] * 0.5f;
                 }
             }
-
-            Tensor leftGrad = new Tensor(leftGradData, leftLeaf.Shape, false);
-            Tensor rightGrad = new Tensor(rightGradData, rightLeaf.Shape, false);
 
             return (leftGrad, rightGrad);
         }
 
         public static (Tensor, Tensor) MinGradFn(Tensor gradient, Tensor leftLeaf, Tensor rightLeaf, Dictionary<string, object> opArgs)
         {
-            byte[] minIndices = (byte[])opArgs["Min_minIndices"];
+            bool[] maskA = (bool[])opArgs["Min_maskA"];
+            bool[] maskB = (bool[])opArgs["Min_maskB"];
+            bool[] equalMask = (bool[])opArgs["Min_equalMask"];
 
-            AlignedArray<float> leftGradData = new AlignedArray<float>(leftLeaf.Length, leftLeaf.Data.Alignment);
-            AlignedArray<float> rightGradData = new AlignedArray<float>(rightLeaf.Length, rightLeaf.Data.Alignment);
+            Tensor leftGrad = new Tensor(leftLeaf.Shape, false);
+            Tensor rightGrad = new Tensor(rightLeaf.Shape, false);
 
-            for (int i = 0; i < minIndices.Length; i++)
+            for (int i = 0; i < gradient.Length; i++)
             {
-                float grad = gradient.Data[i];
-                switch (minIndices[i])
+                int[] broadcastedIndex = TensorOperator.GetMultiIndex(i, gradient.Shape);
+
+                if (maskA[i])
                 {
-                    case 0:
-                        leftGradData[i] = grad;
-                        break;
-                    case 1:
-                        rightGradData[i] = grad;
-                        break;
-                    case 2:
-                        leftGradData[i] = grad * 0.5f;
-                        rightGradData[i] = grad * 0.5f;
-                        break;
+                    int[] originalMultiIndex = TensorOperator.BroadcastedToOriginalIndex(broadcastedIndex, rightLeaf.Shape, gradient.Shape);
+                    int originalIndex = TensorOperator.GetLinearIndex(originalMultiIndex, rightLeaf.Shape);
+                    rightGrad.Data[originalIndex] += gradient.Data[i];
+                }
+                else if (maskB[i])
+                {
+                    int[] originalMultiIndex = TensorOperator.BroadcastedToOriginalIndex(broadcastedIndex, leftLeaf.Shape, gradient.Shape);
+                    int originalIndex = TensorOperator.GetLinearIndex(originalMultiIndex, leftLeaf.Shape);
+                    leftGrad.Data[originalIndex] += gradient.Data[i];
+                }
+                else if (equalMask[i])
+                {
+                    int[] originalMultiIndexLeft = TensorOperator.BroadcastedToOriginalIndex(broadcastedIndex, leftLeaf.Shape, gradient.Shape);
+                    int originalIndexLeft = TensorOperator.GetLinearIndex(originalMultiIndexLeft, leftLeaf.Shape);
+                    int[] originalMultiIndexRight = TensorOperator.BroadcastedToOriginalIndex(broadcastedIndex, rightLeaf.Shape, gradient.Shape);
+                    int originalIndexRight = TensorOperator.GetLinearIndex(originalMultiIndexRight, rightLeaf.Shape);
+
+                    leftGrad.Data[originalIndexLeft] += gradient.Data[i] * 0.5f;
+                    rightGrad.Data[originalIndexRight] += gradient.Data[i] * 0.5f;
                 }
             }
-
-            Tensor leftGrad = new Tensor(leftGradData, leftLeaf.Shape, false);
-            Tensor rightGrad = new Tensor(rightGradData, rightLeaf.Shape, false);
 
             return (leftGrad, rightGrad);
         }

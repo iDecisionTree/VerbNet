@@ -529,28 +529,30 @@
 
             if (buildGraph)
             {
-                byte[] maxIndices = new byte[aBroadcast.Length];
+                bool[] maskA = new bool[aBroadcast.Length];
+                bool[] maskB = new bool[bBroadcast.Length];
+                bool[] equalMask = new bool[aBroadcast.Length];
+
                 for (int i = 0; i < aBroadcast.Length; i++)
                 {
-                    float aValue = aBroadcast.Data[i];
-                    float bValue = bBroadcast.Data[i];
-
-                    if (aValue > bValue)
+                    if (aBroadcast.Data[i] > bBroadcast.Data[i])
                     {
-                        maxIndices[i] = 0;
+                        maskA[i] = true;
                     }
-                    else if (aValue < bValue)
+                    else if (aBroadcast.Data[i] < bBroadcast.Data[i])
                     {
-                        maxIndices[i] = 1;
+                        maskB[i] = true;
                     }
                     else
                     {
-                        maxIndices[i] = 2;
+                        equalMask[i] = true;
                     }
                 }
 
                 result.GradFn = GradFunction.MaxGradFn;
-                result.OpArgs.Add("Max_maxIndices", maxIndices);
+                result.OpArgs.Add("Max_maskA", maskA);
+                result.OpArgs.Add("Max_maskB", maskB);
+                result.OpArgs.Add("Max_equalMask", equalMask);
                 result.LeftLeaf = a;
                 result.LeftLeaf.Father = result;
                 result.RightLeaf = b;
@@ -558,7 +560,21 @@
             }
             else if (requiresGrad && computeGrad)
             {
-                result.Gradient = Max(a.Gradient, b.Gradient, false, false);
+                if (a.RequiresGrad && b.RequiresGrad)
+                {
+                    result.Gradient = Max(a.Gradient, b.Gradient, false, false);
+                }
+                else
+                {
+                    if (a.RequiresGrad)
+                    {
+                        result.Gradient = a.Gradient.Clone();
+                    }
+                    else if (b.RequiresGrad)
+                    {
+                        result.Gradient = b.Gradient.Clone();
+                    }
+                }
             }
 
             return result;
@@ -593,28 +609,30 @@
 
             if (buildGraph)
             {
-                byte[] minIndices = new byte[aBroadcast.Length];
+                bool[] maskA = new bool[aBroadcast.Length];
+                bool[] maskB = new bool[bBroadcast.Length];
+                bool[] equalMask = new bool[aBroadcast.Length];
+
                 for (int i = 0; i < aBroadcast.Length; i++)
                 {
-                    float aValue = aBroadcast.Data[i];
-                    float bValue = bBroadcast.Data[i];
-
-                    if (aValue < bValue)
+                    if (aBroadcast.Data[i] > bBroadcast.Data[i])
                     {
-                        minIndices[i] = 0;
+                        maskA[i] = true;
                     }
-                    else if (aValue > bValue)
+                    else if (aBroadcast.Data[i] < bBroadcast.Data[i])
                     {
-                        minIndices[i] = 1;
+                        maskB[i] = true;
                     }
                     else
                     {
-                        minIndices[i] = 2;
+                        equalMask[i] = true;
                     }
                 }
 
                 result.GradFn = GradFunction.MinGradFn;
-                result.OpArgs.Add("Min_minIndices", minIndices);
+                result.OpArgs.Add("Min_maskA", maskA);
+                result.OpArgs.Add("Min_maskB", maskB);
+                result.OpArgs.Add("Min_equalMask", equalMask);
                 result.LeftLeaf = a;
                 result.LeftLeaf.Father = result;
                 result.RightLeaf = b;
@@ -622,7 +640,21 @@
             }
             else if (requiresGrad && computeGrad)
             {
-                result.Gradient = Min(a.Gradient, b.Gradient, false, false);
+                if (a.RequiresGrad && b.RequiresGrad)
+                {
+                    result.Gradient = Min(a.Gradient, b.Gradient, false, false);
+                }
+                else
+                {
+                    if (a.RequiresGrad)
+                    {
+                        result.Gradient = a.Gradient.Clone();
+                    }
+                    else if (b.RequiresGrad)
+                    {
+                        result.Gradient = b.Gradient.Clone();
+                    }
+                }
             }
 
             return result;
@@ -999,7 +1031,7 @@
                 }
                 else
                 {
-                    throw new InvalidOperationException($"Shapes {string.Join(",", aShape)} and {string.Join(",", bShape)} cannot be broadcasted");
+                    throw new InvalidOperationException($"Shapes [{string.Join(",", aShape)}] and [{string.Join(",", bShape)}] cannot be broadcasted");
                 }
             }
 
@@ -1119,6 +1151,36 @@
             }
 
             return index;
+        }
+
+        public static int[] BroadcastedToOriginalIndex(int[] index, int[] originalShape, int[] broadcastedShape)
+        {
+            if (index.Length != broadcastedShape.Length)
+                throw new ArgumentException("Index and BroadcastedShape must have the same length.", nameof(index));
+
+            int maxRank = Math.Max(originalShape.Length, broadcastedShape.Length);
+
+            int[] expandedOriginal = new int[maxRank];
+            int[] expandedBroadcasted = new int[maxRank];
+
+            Array.Copy(originalShape, 0, expandedOriginal, maxRank - originalShape.Length, originalShape.Length);
+            Array.Copy(broadcastedShape, 0, expandedBroadcasted, maxRank - broadcastedShape.Length, broadcastedShape.Length);
+
+            int[] expandedIndex = new int[maxRank];
+            Array.Copy(index, 0, expandedIndex, maxRank - index.Length, index.Length);
+
+            for (int i = 0; i < maxRank; i++)
+            {
+                if (expandedOriginal[i] == 1 && expandedBroadcasted[i] != 1)
+                {
+                    expandedIndex[i] = 0;
+                }
+            }
+
+            int[] result = new int[originalShape.Length];
+            Array.Copy(expandedIndex, maxRank - originalShape.Length, result, 0, originalShape.Length);
+
+            return result;
         }
     }
 }

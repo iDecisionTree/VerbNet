@@ -9,15 +9,16 @@ namespace VerbNet.Demo
         {
             LayerList layers = new LayerList(
                 new Linear(16, 1024, true, 0.001f, "linear1"),
+                new ReLu(),
                 new Linear(1024, 1024, true, 0.0001f, "linear2"),
-                new Linear(1024, 1, true, 0.001f, "linear3"),
-                new Sigmoid()
+                new ReLu(),
+                new Linear(1024, 1, true, 0.001f, "linear3")
                 );
             MSELoss mse = new MSELoss();
             AdamOptimizer optim = new AdamOptimizer(layers.GetParameters(), 0.0001f);
 
             Tensor input = Tensor.Random([1, 16]);
-            Tensor target = Tensor.Abs(Tensor.Random([1, 1]));
+            Tensor target = Tensor.Random([1, 1]);
 
             Stopwatch stopwatch = new Stopwatch();
 
@@ -32,12 +33,11 @@ namespace VerbNet.Demo
                 mse.Forward(output, target);
                 mse.Backward();
 
-                stopwatch.Stop();
+                optim.Step();
 
+                stopwatch.Stop(); 
                 times[i] = stopwatch.ElapsedMilliseconds;
                 Console.WriteLine($"Epoch: {i}/{times.Length}, Loss: {mse.LossValue}, Time: {stopwatch.ElapsedMilliseconds}ms");
-
-                optim.Step();
             }
 
             float avgTime = 0f;
