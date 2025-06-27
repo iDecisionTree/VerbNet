@@ -9,9 +9,9 @@ namespace VerbNet.Demo
         {
             LayerList layers = new LayerList(
                 new Linear(16, 1024, true, 0.001f, "linear1"),
-                new ReLu(),
+                new ReLU(),
                 new Linear(1024, 1024, true, 0.0001f, "linear2"),
-                new ReLu(),
+                new ReLU(),
                 new Linear(1024, 1, true, 0.001f, "linear3")
                 );
             MSELoss mse = new MSELoss();
