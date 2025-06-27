@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace VerbNet.Core
 {
-    public class ReLu : ActivationFunction
+    public class ReLU : ActivationFunction
     {
         public override Tensor Forward(Tensor input)
         {
