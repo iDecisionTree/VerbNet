@@ -6,13 +6,13 @@
         public bool HasBias;
         public Tensor Bias;
 
-        private int _inputSize;
-        private int _outputSize;
+        public int InputSize;
+        public int OutputSize;
 
         public Linear(int input, int output, bool hasBias = false, float learningRate = 0.001f, string name = "")
         {
-            _inputSize = input;
-            _outputSize = output;
+            InputSize = input;
+            OutputSize = output;
             LearningRate = learningRate;
             Name = name;
 
@@ -29,8 +29,8 @@
         {
             if (input.Shape.Length != 2)
                 throw new ArgumentException($"Input must be 2-dimensional tensor. Got shape: {string.Join(", ", input.Shape)}");
-            if (input.Shape[1] != _inputSize)
-                throw new ArgumentException($"Input feature dimension mismatch. Expected {_inputSize}, got {input.Shape[1]}");
+            if (input.Shape[1] != InputSize)
+                throw new ArgumentException($"Input feature dimension mismatch. Expected {InputSize}, got {input.Shape[1]}");
 
             Tensor output;
             output = Tensor.MatMul(input, Weight);
@@ -84,8 +84,8 @@
             bw.Write((int)LayerType.Linear);
             bw.Write(Name);
             bw.Write(LearningRate);
-            bw.Write(_inputSize);
-            bw.Write(_outputSize);
+            bw.Write(InputSize);
+            bw.Write(OutputSize);
             bw = Weight.Write(bw);
             bw.Write(HasBias);
             if (HasBias)
@@ -102,8 +102,8 @@
             {
                 Name = br.ReadString();
                 LearningRate = br.ReadSingle();
-                _inputSize = br.ReadInt32();
-                _outputSize = br.ReadInt32();
+                InputSize = br.ReadInt32();
+                OutputSize = br.ReadInt32();
                 br = Weight.Read(br);
                 HasBias = br.ReadBoolean();
                 if (HasBias)

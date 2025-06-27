@@ -197,6 +197,8 @@ namespace VerbNet.Core
         public static Tensor Reshape(Tensor a, int[] shape) => TensorOperator.Reshape(a, shape, true, true);
         public Tensor Cat(Tensor b, int dim) => TensorOperator.Concat(this, b, dim, true, true);
         public static Tensor Cat(Tensor a, Tensor b, int dim) => TensorOperator.Concat(a, b, dim, true, true);
+        public Tensor Sum(int dim, bool keepDim) => TensorOperator.Sum(this, dim, keepDim, true, true);
+        public static Tensor Sum(Tensor a, int dim, bool keepDim) => TensorOperator.Sum(a, dim, keepDim, true, true);
 
         public static Tensor Abs(Tensor a) => TensorOperator.Abs(a, true, true);
         public static Tensor Sign(Tensor a) => TensorOperator.Sign(a, true, true);
@@ -223,6 +225,7 @@ namespace VerbNet.Core
         public static Tensor MatMul(Tensor a, Tensor b) => TensorOperator.MatMul(a, b, true, true);
 
         public static Tensor Random(int[] shape, float scale = 1f, bool requiresGrad = false, string name = "") => TensorOperator.Random(shape, scale, requiresGrad, name);
+        public static Tensor Ones(int[] shape, bool requiresGrad = false, string name = "") => TensorOperator.Ones(shape, requiresGrad, name);
 
         public void Backward(Tensor externalGradient = null)
         {

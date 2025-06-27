@@ -353,6 +353,42 @@
             return (leftGrad, rightGrad);
         }
 
+        public static (Tensor, Tensor) SumGradFn(Tensor gradient, Tensor leftLeaf, Tensor rightLeaf, Dictionary<string, object> opArgs)
+        {
+            int dim = (int)opArgs["Sum_dim"];
+            bool keepDim = (bool)opArgs["Sum_keepDim"];
+
+            Tensor leftGrad;
+
+            if (dim == -1)
+            {
+                if (gradient.Length != 1)
+                    throw new InvalidOperationException("Gradient for full reduction must be a scalar");
+
+                leftGrad = new Tensor(leftLeaf.Shape, false);
+                leftGrad.Data.Fill(gradient.Data[0]);
+
+                return (leftGrad, null);
+            }
+
+            if (dim < 0 || dim >= leftLeaf.Rank)
+            {
+                throw new ArgumentOutOfRangeException(nameof(dim), $"Dimension {dim} is out of range for tensor with rank {leftLeaf.Rank}. Valid range is [0, {leftLeaf.Rank - 1}]");
+            }
+
+            Tensor grad = gradient;
+            if (!keepDim)
+            {
+                List<int> newShape = grad.Shape.ToList();
+                newShape.Insert(dim, 1);
+                grad = TensorOperator.Reshape(grad, newShape.ToArray(), false, false);
+            }
+
+            leftGrad = TensorOperator.BroadcastTo(grad, leftLeaf.Shape, false, false);
+
+            return (leftGrad, null);
+        }
+
         public static (Tensor, Tensor) BroadcastGradFn(Tensor gradient, Tensor leftLeaf, Tensor rightLeaf, Dictionary<string, object> opArgs)
         {
             int[] originalShape = (int[])opArgs["OriginalShape"];

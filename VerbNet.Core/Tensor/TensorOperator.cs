@@ -980,6 +980,106 @@
             return result;
         }
 
+        public static Tensor Sum(Tensor a, int dim = -1, bool keepDim = false, bool buildGraph = true, bool computeGrad = true)
+        {
+            if (a == null)
+                throw new ArgumentNullException(nameof(a));
+
+            if (dim >= a.Rank)
+                throw new ArgumentOutOfRangeException(nameof(dim), "维度必须处于张量的阶数范围内");
+
+            int[] newShape;
+            AlignedArray<float> resultData;
+
+            if (dim != -1)
+            {
+                int axis = dim;
+
+                int outer = 1;
+                for (int i = 0; i < axis; i++)
+                {
+                    outer *= a.Shape[i];
+                }
+
+                int dimSize = a.Shape[axis];
+
+                int inner = 1;
+                for (int i = axis + 1; i < a.Rank; i++)
+                {
+                    inner *= a.Shape[i];
+                }
+
+                if (keepDim)
+                {
+                    newShape = a.Shape;
+                    newShape[axis] = 1;
+                }
+                else
+                {
+                    newShape = new int[a.Rank - 1];
+                    for (int i = 0, j = 0; i < a.Rank; i++)
+                    {
+                        if (i != axis) newShape[j++] = a.Shape[i];
+                    }
+                }
+
+                resultData = new AlignedArray<float>(outer * inner, a.Data.Alignment);
+
+                Parallel.For(0, outer, o =>
+                {
+                    for (int i = 0; i < inner; i++)
+                    {
+                        float sum = 0f;
+                        for (int d = 0; d < dimSize; d++)
+                        {
+                            int index = o * dimSize * inner + d * inner + i;
+                            sum += a.Data[index];
+                        }
+                        resultData[o * inner + i] = sum;
+                    }
+                });
+            }
+            else
+            {
+                newShape = keepDim ? Enumerable.Repeat(1, a.Rank).ToArray() : [1];
+
+                float sum = 0f;
+                for (int i = 0; i < a.Data.Length; i++)
+                {
+                    sum += a.Data[i];
+                }
+
+                resultData = new AlignedArray<float>(1, a.Data.Alignment);
+                resultData[0] = sum;
+            }
+
+            bool requiresGrad = computeGrad && a.RequiresGrad;
+            Tensor result = new Tensor(resultData, newShape, requiresGrad);
+
+            if (buildGraph)
+            {
+                result.GradFn = GradFunction.SumGradFn;
+                result.OpArgs["Sum_dim"] = dim;
+                result.OpArgs["Sum_keepDim"] = keepDim;
+                result.LeftLeaf = a;
+                result.LeftLeaf.Father = result;
+            }
+            else if (requiresGrad && computeGrad)
+            {
+                if (dim == -1)
+                {
+                    Tensor ones = Ones(a.Shape);
+                    result.Gradient = keepDim ? ones : Sum(ones, dim, false, false, false);
+                }
+                else
+                {
+                    result.Gradient = Ones(a.Shape);
+                }
+            }
+
+            return result;
+        }
+
         public static Tensor Random(int[] shape, float scale = 1f, bool requiresGrad = false, string name = "")
         {
             if (shape == null)
@@ -1001,6 +1101,14 @@
             }
 
             Tensor result = new Tensor(data, shape, requiresGrad, name);
+
+            return result;
+        }
+
+        public static Tensor Ones(int[] shape, bool requireGrad = false, string name = "")
+        {
+            Tensor result = new Tensor(shape, requireGrad, name);
+            result.Data.Fill(1f);
 
             return result;
         }
