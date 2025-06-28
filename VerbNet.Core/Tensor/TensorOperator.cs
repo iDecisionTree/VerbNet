@@ -49,7 +49,7 @@
         {
             Tensor bTensor = Tensor.Create(b);
 
-            return Add(a, bTensor, false, true);
+            return Add(a, bTensor, true, true);
         }
 
         public static Tensor Subtract(Tensor a, Tensor b, bool buildGraph = true, bool computeGrad = true)
@@ -99,14 +99,14 @@
         {
             Tensor bTensor = Tensor.Create(b);
 
-            return Subtract(a, bTensor, false);
+            return Subtract(a, bTensor, true, true);
         }
 
         public static Tensor Subtract(float a, Tensor b)
         {
             Tensor aTensor = Tensor.Create(a);
 
-            return Subtract(aTensor, b, false, true);
+            return Subtract(aTensor, b, true, true);
         }
 
         public static Tensor Multiply(Tensor a, Tensor b, bool buildGraph = true, bool computeGrad = true)
@@ -156,7 +156,7 @@
         {
             Tensor bTensor = Tensor.Create(b);
 
-            return Multiply(a, bTensor, false, true);
+            return Multiply(a, bTensor, true, true);
         }
 
         public static Tensor Divide(Tensor a, Tensor b, bool buildGraph = true, bool computeGrad = true)
@@ -208,14 +208,14 @@
         {
             Tensor bTensor = Tensor.Create(b);
 
-            return Divide(a, bTensor, false, true);
+            return Divide(a, bTensor, true, true);
         }
 
         public static Tensor Divide(float a, Tensor b)
         {
             Tensor aTensor = Tensor.Create(a);
 
-            return Divide(aTensor, b, false);
+            return Divide(aTensor, b, true, true);
         }
 
         public static Tensor Negate(Tensor a, bool buildGraph = true, bool computeGrad = true)
@@ -584,14 +584,14 @@
         {
             Tensor bTensor = Tensor.Create(b);
 
-            return Max(a, bTensor, false);
+            return Max(a, bTensor, true, true);
         }
 
         public static Tensor Max(float a, Tensor b)
         {
             Tensor aTensor = Tensor.Create(a);
 
-            return Max(aTensor, b, false);
+            return Max(aTensor, b, true, true);
         }
 
         public static Tensor Min(Tensor a, Tensor b, bool buildGraph = true, bool computeGrad = true)
@@ -664,14 +664,14 @@
         {
             Tensor bTensor = Tensor.Create(b);
 
-            return Min(a, bTensor, false);
+            return Min(a, bTensor, true, true);
         }
 
         public static Tensor Min(float a, Tensor b)
         {
             Tensor aTensor = Tensor.Create(a);
 
-            return Min(aTensor, b, false);
+            return Min(aTensor, b, true, true);
         }
 
         public static Tensor Floor(Tensor a, bool buildGraph = true, bool computeGrad = true)
@@ -1078,6 +1078,81 @@
             }
 
             return result;
+        }
+
+        public static Tensor Mean(Tensor a, int dim = -1, bool keepDim = false, bool buildGraph = true, bool computeGrad = true)
+        {
+            if (a == null)
+                throw new ArgumentNullException(nameof(a));
+
+            Tensor sum = Sum(a, dim, keepDim, true, true);
+
+            int numElements;
+            if (dim == -1)
+            {
+                numElements = a.Length;
+            }
+            else
+            {
+                if (dim < 0 || dim >= a.Rank)
+                    throw new ArgumentOutOfRangeException(nameof(dim), "Dimension must be within the tensor's rank");
+                numElements = a.Shape[dim];
+            }
+
+            Tensor result = Divide(sum, numElements);
+
+            if (buildGraph)
+            {
+                result.GradFn = GradFunction.MeanGradFn;
+                result.OpArgs["Mean_dim"] = dim;
+                result.OpArgs["Mean_keepDim"] = keepDim;
+                result.OpArgs["Mean_numElements"] = numElements;
+                result.LeftLeaf = a;
+                result.LeftLeaf.Father = result;
+            }
+            else if (computeGrad && a.RequiresGrad)
+            {
+                if (dim == -1)
+                {
+                    Tensor ones = Ones(a.Shape);
+                    result.Gradient = Divide(ones, numElements);
+                }
+                else
+                {
+                    result.Gradient = Divide(Ones(a.Shape), numElements);
+                }
+            }
+
+            return result;
+        }
+
+        public static Tensor Variance(Tensor a, int dim = -1, bool keepDim = false, bool buildGraph = true, bool computeGrad = true)
+        {
+            if (a == null)
+                throw new ArgumentNullException(nameof(a));
+
+            Tensor mean = Mean(a, dim, true, true, true);
+
+            Tensor squaredDiff = Power(Subtract(a, mean), 2, true, true);
+
+            Tensor variance = Mean(squaredDiff, dim, keepDim, buildGraph, computeGrad);
+
+            if (buildGraph)
+            {
+                variance.GradFn = GradFunction.VarianceGradFn;
+                variance.OpArgs["Variance_dim"] = dim;
+                variance.OpArgs["Variance_keepDim"] = keepDim;
+                variance.LeftLeaf = a;
+                variance.LeftLeaf.Father = variance;
+            }
+            else if (computeGrad && a.RequiresGrad)
+            {
+                int n = (dim == -1) ? a.Length : a.Shape[dim];
+                Tensor diff = Subtract(a, mean);
+                variance.Gradient = Multiply(Divide(diff, n - 1), Tensor.Create(2f));
+            }
+
+            return variance;
         }
 
         public static Tensor Random(int[] shape, float scale = 1f, bool requiresGrad = false, string name = "")

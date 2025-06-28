@@ -197,8 +197,12 @@ namespace VerbNet.Core
         public static Tensor Reshape(Tensor a, int[] shape) => TensorOperator.Reshape(a, shape, true, true);
         public Tensor Cat(Tensor b, int dim) => TensorOperator.Concat(this, b, dim, true, true);
         public static Tensor Cat(Tensor a, Tensor b, int dim) => TensorOperator.Concat(a, b, dim, true, true);
-        public Tensor Sum(int dim, bool keepDim) => TensorOperator.Sum(this, dim, keepDim, true, true);
-        public static Tensor Sum(Tensor a, int dim, bool keepDim) => TensorOperator.Sum(a, dim, keepDim, true, true);
+        public Tensor Sum(int dim = -1, bool keepDim = false) => TensorOperator.Sum(this, dim, keepDim, true, true);
+        public static Tensor Sum(Tensor a, int dim = -1, bool keepDim = false) => TensorOperator.Sum(a, dim, keepDim, true, true);
+        public Tensor Mean(int dim = -1, bool keepDim = false) => TensorOperator.Mean(this, dim, keepDim, true, true);
+        public static Tensor Mean(Tensor a, int dim = -1, bool keepDim = false) => TensorOperator.Mean(a, dim, keepDim, true, true);
+        public Tensor Variance(int dim = -1, bool keepDim = false) => TensorOperator.Variance(this, dim, keepDim, true, true);
+        public static Tensor Variance(Tensor a, int dim = -1, bool keepDim = false) => TensorOperator.Variance(a, dim, keepDim, true, true);
 
         public static Tensor Abs(Tensor a) => TensorOperator.Abs(a, true, true);
         public static Tensor Sign(Tensor a) => TensorOperator.Sign(a, true, true);

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace VerbNet.Core
 {
-    public abstract class Normalization
+    public abstract class Normalization : Layer
     {
         public int InputSize;
 
@@ -15,6 +15,29 @@ namespace VerbNet.Core
             InputSize = input;
         }
 
-        public abstract Tensor Forward(Tensor input);
+        public override void ApplyGrad()
+        {
+            
+        }
+
+        public override BinaryReader Read(BinaryReader br)
+        {
+            return br;
+        }
+
+        public override BinaryWriter Write(BinaryWriter bw)
+        {
+            return bw;
+        }
+
+        public override Tensor[] GetParameters()
+        {
+            return new Tensor[0];
+        }
+
+        public override void ZeroGrad()
+        {
+            
+        }
     }
 }

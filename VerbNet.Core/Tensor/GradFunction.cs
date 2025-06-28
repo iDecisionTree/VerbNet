@@ -389,6 +389,72 @@
             return (leftGrad, null);
         }
 
+        public static (Tensor, Tensor) MeanGradFn(Tensor gradient, Tensor leftLeaf, Tensor rightLeaf, Dictionary<string, object> opArgs)
+        {
+            int dim = (int)opArgs["Mean_dim"];
+            bool keepDim = (bool)opArgs["Mean_keepDim"];
+
+            Tensor leftGrad;
+            float scale;
+
+            if (dim == -1) // Mean over all dimensions
+            {
+                scale = 1.0f / leftLeaf.Length;
+                leftGrad = new Tensor(leftLeaf.Shape, false);
+                leftGrad.Data.Fill(gradient.Data[0] * scale);
+
+                return (leftGrad, null);
+            }
+
+            if (dim < 0 || dim >= leftLeaf.Rank)
+            {
+                throw new ArgumentOutOfRangeException(nameof(dim),
+                    $"Dimension {dim} is out of range for tensor with rank {leftLeaf.Rank}. " +
+                    $"Valid range is [0, {leftLeaf.Rank - 1}]");
+            }
+
+            Tensor grad = gradient;
+            if (!keepDim)
+            {
+                List<int> newShape = grad.Shape.ToList();
+                newShape.Insert(dim, 1);
+                grad = TensorOperator.Reshape(grad, newShape.ToArray(), false, false);
+            }
+
+            scale = 1.0f / leftLeaf.Shape[dim];
+
+            leftGrad = TensorOperator.BroadcastTo(grad, leftLeaf.Shape, false, false);
+            leftGrad = TensorOperator.Multiply(leftGrad, Tensor.Create(scale, false), false, false);
+
+            return (leftGrad, null);
+        }
+
+        public static (Tensor, Tensor) VarianceGradFn(Tensor gradient, Tensor leftLeaf, Tensor rightLeaf, Dictionary<string, object> opArgs)
+        {
+            int dim = (int)opArgs["Variance_dim"];
+            bool keepDim = (bool)opArgs["Variance_keepDim"];
+
+            Tensor mean = TensorOperator.Mean(leftLeaf, dim, true, false, false);
+
+            int n = (dim == -1) ? leftLeaf.Length : leftLeaf.Shape[dim];
+
+            Tensor diff = TensorOperator.Subtract(leftLeaf, mean, false, false);
+            Tensor scale = Tensor.Create(2f / (n - 1), false);
+            Tensor leftGrad = TensorOperator.Multiply(diff, scale, false, false);
+            leftGrad = TensorOperator.Multiply(leftGrad, gradient, false, false);
+
+            if (!keepDim && dim != -1)
+            {
+                List<int> newShape = leftGrad.Shape.ToList();
+                newShape.Insert(dim, 1);
+                leftGrad = TensorOperator.Reshape(leftGrad, newShape.ToArray(), false, false);
+            }
+
+            leftGrad = TensorOperator.BroadcastTo(leftGrad, leftLeaf.Shape, false, false);
+
+            return (leftGrad, null);
+        }
+
         public static (Tensor, Tensor) BroadcastGradFn(Tensor gradient, Tensor leftLeaf, Tensor rightLeaf, Dictionary<string, object> opArgs)
         {
             int[] originalShape = (int[])opArgs["OriginalShape"];
